@@ -1,0 +1,101 @@
+require program;
+
+class Animal:
+	properties:
+		public string name, Race;
+		private int age;
+	end
+
+	methods:
+		public function void ladrar:
+			Print("Barf");
+		end
+
+		public function int Getage:
+			return age;
+		end
+
+		public function void set:
+			parameters:
+				string Name, Raza;
+				int age; 
+			end
+			name = Name;
+			Race = Raza;
+			age = age;
+		end
+	end
+end
+
+def int main :
+	//PARAMETERS
+	parameters :
+	end
+
+	//Mathematical function declaration in one line (implicitly a double)
+	fx Rest (x,y) = x - y;
+
+	//Function (in one line) that takes n arguments of the same type and performs a recursive operation = Own
+	recursive MultiN = int *;// DataType Operator
+	recursive SUM =  int +;
+
+	//Function (in one line) that takes an argument and performs an operation on itself n times = own
+	//Assumes the data type of the argument
+	self Power10 (*, 10);
+
+	//INSTANCE OF CLASS
+	Animal Dog = new Animal();
+
+	//VARIABLES
+	int res;
+	string name, oracion;
+	bool flag;
+	double Power;
+
+	//ASSIGNMENT
+	flag = true;
+	res = sum(num1, num2) * (43 + 23);
+	name = "Pedro";
+
+	oracion= "Your name is ${name}"; 
+	Power = Power10(res);
+
+	//FUNCTION CALL
+	Print ();
+
+	//IF
+	if id():
+		Print();
+	elif Id<Id:
+		Print();
+	elif a<2 && b>1:
+		sum = 2*5;
+	else:
+		//NOTHING
+	end
+
+	while [[a > id && 4>d] && [""<""]] || true:
+		//while content
+	end
+
+	do while true :
+		//Do While content
+	whenever a>b:
+		//After each line of the main while block,
+		//the whenever condition is checked
+		//If it is true, the contents of whenever are executed
+	whenever c<d:
+		//n number of whenever blocks
+		//whenever content
+	end
+
+	return 0;
+end
+
+def int sum:
+	parameters:
+		int num1, num2;
+	end
+
+	return num1 + num2;
+end
