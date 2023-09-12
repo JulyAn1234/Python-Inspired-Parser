@@ -34,6 +34,10 @@ extern char lineBuffer[1000];
 %%
 //////////////////// INSTRUCCIONES DENTRO DE LA FUNCIÓN //////////////
 
+program:
+    function_behavior
+;
+
 function_behavior:
     //Vacio
 |    function_behavior_alpha function_behavior
@@ -128,7 +132,6 @@ factor:
     ID
 |   INTEGER
 |   FLOATING 
-|   numerical_expression
 |   LEFT_GROUP numerical_expression RIGHT_GROUP
 ;
 
