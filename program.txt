@@ -1,2 +1,10 @@
 int suma;
-suma = 241;
+suma = 241+(123*231)+2312.13321/32132.14321+dasd*daas/(assad+adsads-sdass);
+
+while true:
+	read("");
+end
+
+if 3<132:
+	write("");
+end
