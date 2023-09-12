@@ -1,4 +1,3 @@
-
 %{
 #include <stdio.h>
 #include "Parser.tab.h"
@@ -8,367 +7,158 @@
 extern char lineBuffer[1000];
 %}
 
-%token WhenEver
-%token FileFuncs
-%token ErrorWord
-%token Exception
-%token MathFunc
-%token StringFunc
-%token MacroConstant
-%token Access
-%token Assertion
-%token Control
-%token Classes
-%token Concurrency
-%token Interface
-%token Memory
-%token Modifier
-%token Package
-%token Serialization
-%token RemainderFunction
-%token Inheritance
-%token GammaFunction
-%token Template
-%token List
-%token Set
-%token Map
-%token Queue
-%token Stack
-%token ConsoleOutputFunc
-%token ConsoleInputFunc
-%token Try
-%token Catch
-%token Finally
-%token Switch
-%token Case
-%token SDefault
-%token TypeDef
-%token Break
-%token TypeMod
-%token SignMod
-
-%token New
-%token FxWord
-%token SelfWord
-%token RecursiveWord
-%token AccessMod
-%token ClassDef
-%token ClassMethod
-%token ClassProp
-%token While
-%token For
-%token Do
-%token ElseCond
-%token Condicional
-%token Else
-%token Retorno
-%token UniRelOp
-%token LogOp
-%token RelOp
-%token BoolValue
-%token DOT
+%token READ
+%token WRITE
+%token WHILE
+%token IF
+%token TYPE
+%token BOOL
+%token END
+%token SUM
 %token MINUS
-%token STAR
-%token SLASH
-%token Texto
-%token PLUS
-%token UNDEFINED
+%token DIV
+%token MULT
+%token REL_OP
+%token ASSIGN
+%token SEMI_COLON
+%token COLON
+%token COMMA
+%token LEFT_GROUP
+%token RIGHT_GROUP
+%token STRING
 %token ID
-%token Entero
-%token Flotante
-%token FuncDef
-%token Init
-%token DataType
-%token FuncParameter
-%token LibImport
-%token Ender
-%token LineEnder
-%token Comma
-%token Asignar
-%token EndBracket
-%token InBracket
-%token InGroup
-%token EndGroup
-
+%token FLOATING
+%token INTEGER
+%token UNDEFINED
 
 %%
-
-PROGRAM:
-    IMPORT_STATEMENT PROGRAM_BODY
-;
-
-//ZERO O MÁS
-IMPORT_STATEMENT
-://VACIO
-|   LibImport ID LineEnder IMPORT_STATEMENT
-;
-
-
-PROGRAM_BODY:
-//vacio
-|    PROGRAM_BODY_ALPHA PROGRAM_BODY
-;
-
-PROGRAM_BODY_ALPHA:
-    FUNCTION_STATEMENT
-|   CLASS_STATEMENT
-;
-
-////////////////////// CLASES //////////////////////
-
-CLASS_STATEMENT:
-    ClassDef ID Init CLASS_BODY Ender
-;
-
-CLASS_BODY:
-    CLASS_PROPERTIES CLASS_METHODS
-;
-
-CLASS_PROPERTIES:
-//VACIO
-|    ClassProp Init PROPERTY_LINES Ender
-;
-
-PROPERTY_LINES:
-//VACIO
-|    ACCESS_MOD VAR_INIT LineEnder PROPERTY_LINES
-;
-
-ACCESS_MOD:
-//VACIO
-|   AccessMod    
-;
-
-CLASS_METHODS:
-//VACIO
-|    ClassMethod Init METHODS_BODY Ender
-;
-
-METHODS_BODY:
-//VACIO
-|    ACCESS_MOD FUNCTION_STATEMENT METHODS_BODY
-;
-
-////////////////  FUNCIONES  ////////////////////////
-
-FUNCTION_STATEMENT:
-   FuncDef DataType ID Init FUNCTION_BODY RETURN_LINE Ender
-;
-
-RETURN_LINE:
-//vacio
-|    Retorno EXPRESSION LineEnder
-;
-
-FUNCTION_BODY:
-    PARAMETER_STATEMENT FUNCTION_BEHAVIOR
-;
-
-PARAMETER_STATEMENT:
-//vacio
-|    FuncParameter Init PARAMETER_BODY Ender
-;
-
-//ZERO O MAS
-PARAMETER_BODY:
-    //vacio
-|   VAR_INIT LineEnder PARAMETER_BODY
-;
-
 //////////////////// INSTRUCCIONES DENTRO DE LA FUNCIÓN //////////////
 
-FUNCTION_BEHAVIOR:
+function_behavior:
     //Vacio
-|    FUNCTION_BEHAVIOR_ALPHA FUNCTION_BEHAVIOR
+|    function_behavior_alpha function_behavior
 ;
 
-FUNCTION_BEHAVIOR_ALPHA:
-    FUNCTION_LINE
-|   IF_STATEMENT
-|   LOOP
+function_behavior_alpha:
+    function_line
+|   if_statement
+|   loop
 ;
 
 ///////////////////// BUCLES //////////////////
 
-DO:
-//Vacio
-| Do
-;
-
-LOOP:
-    DO While BOOL_EXPRESSION Init FUNCTION_BEHAVIOR WHENEVER Ender
-;
-
-WHENEVER:
-//VACIO
-|   WhenEver BOOL_EXPRESSION Init FUNCTION_BEHAVIOR WHENEVER
+loop:
+    WHILE bool_expression COLON function_behavior END
 ;
 
 ///////////////// IF ///////////////
 
-IF_STATEMENT:
-    Condicional BOOL_EXPRESSION Init FUNCTION_BEHAVIOR ELSES Ender
-;
-
-ELSES:
-//Vacio
-|   ElseCond BOOL_EXPRESSION Init FUNCTION_BEHAVIOR ELSES
-|   Else Init FUNCTION_BEHAVIOR
+if_statement:
+    IF bool_expression COLON function_behavior END
 ;
 
 /////////////////LINEAS DE CÓDIGO VÁLIDAS EN UNA FUNCIÓN///////////////
 
-FUNCTION_LINE:
-    FUNCTION_LINE_ALPHA LineEnder
+function_line:
+    function_line_alpha SEMI_COLON
 ;
 
-FUNCTION_LINE_ALPHA:
+function_line_alpha:
 //vacio
-|   VAR_ASSIGN
-|   VAR_INIT
-|   FUNCTION_CALL
-|   INLINE_FUNCTION
-|   OBJECT_INIT
+|   var_assign
+|   var_init
+|   method_call
 ;
 
 
-OBJECT_INIT:
-    ID ID Asignar New FUNCTION_CALL
+var_init:
+    TYPE multi_id
 ;
 
-INLINE_FUNCTION:
-    FX
-|   SELF
-|   RECURSIVE
-;
-
-FX:
-    FxWord ID InGroup MULTI_ID EndGroup Asignar NUMERICAL_EXPRESSION
-;
-
-RECURSIVE:
-    RecursiveWord ID Asignar DataType OPERATORS
-;
-
-OPERATORS:
-    STAR
-|   PLUS
-|   MINUS
-|   SLASH
-|   RelOp
-|   LogOp
-;
-
-SELF:
-    SelfWord ID InGroup OPERATORS Comma Entero EndGroup
-;
-
-VAR_INIT:
-    DataType MULTI_ID
-;
-
-    MULTI_ID: 
-        ID COMMA_ID
+    multi_id: 
+        ID comma_id
     ;   
         //Estructura zero o más
-        COMMA_ID:
+        comma_id:
         //Vacio
-        |   Comma ID COMMA_ID
+        |   COMMA ID comma_id
         ;
 
-VAR_ASSIGN: 
-    MULTI_ID Asignar EXPRESSION
+var_assign: 
+    multi_id ASSIGN expression
 ;
 
-FUNCTION_CALL:
-    BUILDIN_FUNC InGroup MULTI_EXPRESSION EndGroup
-;
-    MULTI_EXPRESSION:
-    //VACIO
-    |    EXPRESSION COMMA_EXPRESSION
-    ;
-        COMMA_EXPRESSION:
-        //VACIO
-        |  Comma EXPRESSION COMMA_EXPRESSION
-        ;
-
-BUILDIN_FUNC:
-    ID
-|   FileFuncs
-|   MathFunc
-|   StringFunc
-|   GammaFunction
-|   ConsoleOutputFunc
-|   ConsoleInputFunc
+method_call:
+    READ LEFT_GROUP STRING RIGHT_GROUP
+|   WRITE LEFT_GROUP STRING RIGHT_GROUP
 ;
 
 /////////////////////////////////////////////EXPRESIONES////////////////////////////////////////
 
 //PARA USAR EN ASIGNACIÓN
-EXPRESSION:
-    Texto
-|   NUMERICAL_EXPRESSION
-|   BoolValue
+expression:
+    STRING
+|   numerical_expression
+|   BOOL
 ;
 
                             //NUMERICAS
-NUMERICAL_EXPRESSION:
-    TERMINO NUMERICAL_EXPRESSION_PRIME
+numerical_expression:
+    term numerical_expression_prime
 ;
 
 
-NUMERICAL_EXPRESSION_PRIME:
+numerical_expression_prime:
 //VACIO
-|   PLUS TERMINO NUMERICAL_EXPRESSION_PRIME
-|   MINUS TERMINO NUMERICAL_EXPRESSION_PRIME
+|   SUM term numerical_expression_prime
+|   MINUS term numerical_expression_prime
 ;
 
-TERMINO:
-    FACTOR TERMINO_PRIME
+term:
+    factor term_prime
 ;
 
-TERMINO_PRIME:
+term_prime:
 //VACIO
-|    STAR FACTOR TERMINO_PRIME
-|    SLASH FACTOR TERMINO_PRIME
+|    MULT factor term_prime
+|    DIV factor term_prime
 ;
 
-FACTOR:
+factor:
     ID
-|   FUNCTION_CALL
-|   Entero
-|   Flotante 
-|   InGroup NUMERICAL_EXPRESSION EndGroup
+|   INTEGER
+|   FLOATING 
+|   numerical_expression
+|   LEFT_GROUP numerical_expression RIGHT_GROUP
+;
+
+bool_expression:
+    rel_expression
+|   BOOL
+;
+rel_expression:
+    numerical_expression REL_OP numerical_expression
 ;
 
                              //BOOLEANAS
                              
-BOOL_EXPRESSION:
-    BOOL_TERM BOOL_EXPRESSION_PRIME
-;
+// BOOL_EXPRESSION:
+//     BOOL_TERM BOOL_EXPRESSION_PRIME
+// ;
 
-BOOL_EXPRESSION_PRIME:
-//VACIO
-|    LogOp BOOL_TERM BOOL_EXPRESSION_PRIME
-;
+// BOOL_EXPRESSION_PRIME:
+// //VACIO
+// |    LogOp BOOL_TERM BOOL_EXPRESSION_PRIME
+// ;
 
-//AÑADIR FUNCIÓN
-BOOL_TERM:
-    ID
-|   FUNCTION_CALL
-|   BoolValue
-|   REL_EXPRESSION
-|   UNI_EXPRESSION
-|   InBracket BOOL_EXPRESSION EndBracket
-;
-
-REL_EXPRESSION:
-    NUMERICAL_EXPRESSION RelOp NUMERICAL_EXPRESSION
-|   Texto RelOp Texto
-;
-
-UNI_EXPRESSION:
-    UniRelOp BOOL_TERM
-;
+// //AÑADIR FUNCIÓN
+// BOOL_TERM:
+//     ID
+// |   FUNCTION_CALL
+// |   BoolValue
+// |   REL_EXPRESSION
+// |   UNI_EXPRESSION
+// |   InBracket BOOL_EXPRESSION EndBracket
+// ;
 
 %%
