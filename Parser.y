@@ -94,7 +94,12 @@ var_assign:
 
 method_call:
     READ LEFT_GROUP ID RIGHT_GROUP
-|   WRITE LEFT_GROUP STRING RIGHT_GROUP
+|   WRITE LEFT_GROUP write_parameter RIGHT_GROUP
+;
+
+write_parameter:
+    STRING
+|   ID
 ;
 
 /////////////////////////////////////////////EXPRESIONES////////////////////////////////////////

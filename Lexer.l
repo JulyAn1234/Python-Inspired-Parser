@@ -17,7 +17,7 @@ read {strcat(lineBuffer, yytext); return READ;}
 write {strcat(lineBuffer, yytext); return WRITE;}
 while {strcat(lineBuffer, yytext); return WHILE;}
 if  {strcat(lineBuffer, yytext); return IF;}
-int|float|double|char|string {strcat(lineBuffer, yytext); return TYPE;}
+int|float|double|char|string|bool {strcat(lineBuffer, yytext); return TYPE;}
 true|false {strcat(lineBuffer, yytext); return BOOL;}
 end {strcat(lineBuffer, yytext); return END;}
 \+ {strcat(lineBuffer, yytext); return SUM;}

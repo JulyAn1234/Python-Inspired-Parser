@@ -1,10 +1,13 @@
 int suma;
-suma = 241+(123*231)+2312.13321/32132.14321+dasd*daas/(assad+adsads-sdass);
-
+suma = 241+(123*231)+2312.13321/32132.14321+var1*var2/(var3+var4-var5);
+bool b;
+b = true;
 while true:
-	read("");
+	write("Escribe un valor:");
+	read(var1);
+	write(var1);
 end
 
 if 3<132:
-	write("");
+	write("3<132");
 end
