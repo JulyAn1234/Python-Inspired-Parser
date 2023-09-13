@@ -1,4 +1,5 @@
-%option noyywrap
+%opt
+ion noyywrap
 %option yylineno
 
 %{

@@ -34,9 +34,6 @@ extern char lineBuffer[1000];
 %%
 //////////////////// INSTRUCCIONES DENTRO DE LA FUNCIÓN //////////////
 
-program:
-    function_behavior
-;
 
 function_behavior:
     //Vacio
