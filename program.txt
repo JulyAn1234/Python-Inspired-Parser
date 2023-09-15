@@ -1,13 +1,32 @@
+
 int suma;
 suma = 241+(123*231)+2312.13321/32132.14321+var1*var2/(var3+var4-var5);
 bool b;
 b = true;
-while true:
-	write("Escribe un valor:");
-	read(var1);
-	write(var1);
+
+
+if 1<1:
+	string a;
+	a = "if1";
+	if 2<2:
+		string c;
+		c = "if2";
+		if 3<3:
+			string d;
+			d = "if3";
+			if 4<4:
+				string e;
+				e = "if4";
+				while 3<4:
+					string f;
+					f = "while";
+				end
+			end
+		end
+	end
 end
 
-if 3<132:
-	write("3<132");
-end
+if 7<6:
+	int a;
+	a = 2;
+end 

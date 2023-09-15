@@ -3,8 +3,22 @@
 #include "Parser.tab.h"
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
+#include <unordered_map>
+
+// Define the struct
+struct function_scope {
+    std::unordered_map<std::string, int> data;
+    function_scope* next; // Pointer to the same type
+
+    // Constructor
+    function_scope() : next(nullptr) {}
+};
 
 extern char lineBuffer[1000];
+
+
+
 %}
 
 %token READ
@@ -34,16 +48,15 @@ extern char lineBuffer[1000];
 %%
 //////////////////// INSTRUCCIONES DENTRO DE LA FUNCIÓN //////////////
 
-
 function_behavior:
     //Vacio
-|    function_behavior_alpha function_behavior
+|    function_behavior_alpha function_behavior {printf("PROGRAM DONE\n")}
 ;
 
 function_behavior_alpha:
-    function_line
-|   if_statement
-|   loop
+    function_line {printf("Line: ");printf(lineBuffer); printf("\n")}
+|   if_statement {printf("If: ");printf(lineBuffer); printf("\n")}
+|   loop {printf("loop: ");printf(lineBuffer); printf("\n")}
 ;
 
 ///////////////////// BUCLES //////////////////
@@ -53,7 +66,11 @@ loop:
 ;
 
 ///////////////// IF ///////////////
-
+// Ha sido encontrado que necesito un punto de control extra
+// Cuando el segmento IF bool_expression COLON es encontrado
+// tengo que inicializar un ambito, por lo tanto, ese segmento deberia
+// ser separado en otra produccion
+// Cuando el if_statement completo se detecta, se termina el ambito
 if_statement:
     IF bool_expression COLON function_behavior END
 ;
@@ -73,7 +90,7 @@ function_line_alpha:
 
 
 var_init:
-    TYPE multi_id
+    TYPE multi_id 
 ;
 
     multi_id: 
@@ -91,7 +108,7 @@ var_assign:
 
 method_call:
     READ LEFT_GROUP ID RIGHT_GROUP
-|   WRITE LEFT_GROUP write_parameter RIGHT_GROUP
+|   WRITE LEFT_GROUP write_parameter RIGHT_GROUP 
 ;
 
 write_parameter:

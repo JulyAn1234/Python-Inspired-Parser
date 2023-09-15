@@ -1152,6 +1152,22 @@ YYLABEL(yyreduce)
 
   switch (yyn) {
 
+case 2:
+#line 40 "Parser.y"
+{printf("PROGRAM DONE\n");
+    break;}
+case 3:
+#line 44 "Parser.y"
+{printf("Line: ");printf(lineBuffer); printf("\n");
+    break;}
+case 4:
+#line 45 "Parser.y"
+{printf("If: ");printf(lineBuffer); printf("\n");
+    break;}
+case 5:
+#line 46 "Parser.y"
+{printf("loop: ");printf(lineBuffer); printf("\n");
+    break;}
 }
 
 #line 839 "/usr/share/bison++/bison.cc"
