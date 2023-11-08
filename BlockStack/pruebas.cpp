@@ -13,8 +13,25 @@ int main(){
     cout<<result<<endl;
     result = block_stack_property.add_line("hola3");
     cout<<result<<endl;
-
-    result = block_stack_property.write_file("intermediateCode.txt");
+    result = block_stack_property.new_if_block("x>y");
+    cout<<result<<endl;
+    result = block_stack_property.add_line("if_action_1");
+    cout<<result<<endl;
+    result = block_stack_property.add_line("if_action_2");
+    cout<<result<<endl;
+    // result = block_stack_property.new_if_block("x>y");
+    // cout<<result<<endl;
+    // result = block_stack_property.new_if_block("x>y");
+    // cout<<result<<endl;
+    // result = block_stack_property.delete_if_block();
+    // cout<<result<<endl;
+    // result = block_stack_property.delete_if_block();
+    // cout<<result<<endl;    
+    result = block_stack_property.delete_if_block();
+    cout<<result<<endl;
+    result = block_stack_property.add_line("After_action_1");
+    cout<<result<<endl;
+    result = block_stack_property.add_line("After_action_2");
     cout<<result<<endl;
     // int count = 0;
     // std::string name = "L"+ to_string(count) + ":";

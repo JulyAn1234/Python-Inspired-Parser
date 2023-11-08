@@ -22,7 +22,7 @@ class block_stack
         string* current_block ();
         
         //Same Idea as push from the stack data structure, specific for if blocks
-        string new_if_block();
+        string new_if_block(string condition);
         //Same Idea as pop from the stack data structure, specific for if blocks
         string delete_if_block();
 

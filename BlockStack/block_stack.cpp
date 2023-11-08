@@ -25,6 +25,14 @@ block_stack::block_stack()
 
 block_stack::~block_stack()
 {
+
+    while (!block_stack_property.empty()) {
+        if(block_stack_property.size() ==1){
+            write_file("intermediateCode.txt");            
+        }
+        delete block_stack_property.top();
+        block_stack_property.pop();
+    }
 }
 
 string* block_stack::current_block()
@@ -57,13 +65,46 @@ string block_stack::add_line(string line)
     }
 }
 
-string block_stack::new_if_block()
-{
-    string name = "L"+ to_string(count) + ":";
-    count++;
-    string* ptr = &name;
-    block_stack_property.push(ptr);
-    return name;
+string block_stack::new_if_block(string condition){
+    try
+    {
+        add_line("if "+condition+" goto L"+to_string(count));
+        string label = "L"+ to_string(count) + ":";
+        count++;
+        block_stack_property.push(new string(label));
+        return "Added if block " + label + " successfully\n";
+    }
+    catch(const std::exception& e)
+    {
+        return "Error: " + string(e.what())+ "\n";
+    }
+
+}
+
+string block_stack::delete_if_block(){
+    try
+    {
+        string* current_block = block_stack_property.top();
+        if (current_block != nullptr) {
+            // Edit the content of the string pointed to by the top pointer
+            string if_content = *current_block;
+            if_content = "goto L"+to_string(count)+"\n"+if_content;
+            cout << "if_content looks like this:" << if_content << endl;
+            delete current_block;
+            // cout<<"current_block deleted:"<<*current_block<<endl;
+            block_stack_property.pop();
+            add_line(if_content);
+            add_line("L"+to_string(count)+":");
+            count++;
+            return "Deleted if block successfully\n";
+        } else {
+            return "Top pointer is null:\n";
+        }
+    }
+    catch(const std::exception& e)
+    {
+        return "Error: " + string(e.what())+ "\n";
+    }
 }
 
 string block_stack::write_file(string file_name)
