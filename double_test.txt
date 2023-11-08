@@ -1,0 +1,12 @@
+float b;
+int a;
+b=3;
+a=3;
+
+if b==a:
+    write("");
+end
+
+while b>a:
+    write("");
+end

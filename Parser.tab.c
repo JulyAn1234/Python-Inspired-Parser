@@ -100,12 +100,40 @@ Maintained by Magnus Ekdahl <magnus@debian.org>
  #line 88 "/usr/share/bison++/bison.cc"
 #line 1 "Parser.y"
 
-#include <stdio.h>
 #include "Parser.tab.h"
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
+#include "sym_table.h"
+#include <time.h>
+#include <string>
+#include <unistd.h>
+//#include <>
 
+//Prototipos y externos, se rompe todo si no estan...
+int yylex();
+extern FILE* yyin;
+void yyerror(char* s);
+char* to_char_ptr (const string& str);
+void semantic_error(semantic_result res);
+semantic_result type_system_numeric(char* type1, char* type2, char* op);
+semantic_result get_type_relation(string type1, string type2);
 extern char lineBuffer[1000];
+extern int yylineno;
+
+sym_table Table;
+semantic_result res;
+
+#line 27 "Parser.y"
+typedef union
+{
+    char *text;
+    void* expression_node;
+} yy_parse_stype;
+#define YY_parse_STYPE yy_parse_stype
+#ifndef YY_USE_CLASS
+#define YYSTYPE yy_parse_stype
+#endif
 
 #line 88 "/usr/share/bison++/bison.cc"
 /* %{ and %header{ and %union, during decl */
@@ -160,12 +188,6 @@ extern char lineBuffer[1000];
 /* section apres lecture def, avant lecture grammaire S2 */
 
  #line 134 "/usr/share/bison++/bison.cc"
-#ifndef YY_USE_CLASS
-# ifndef YYSTYPE
-#  define YYSTYPE int
-#  define YYSTYPE_IS_TRIVIAL 1
-# endif
-#endif
 
 #line 134 "/usr/share/bison++/bison.cc"
 /* prefix */
@@ -510,7 +532,7 @@ YY_parse_CONSTRUCTOR_CODE;
  #line 352 "/usr/share/bison++/bison.cc"
 
 
-#define	YYFINAL		73
+#define	YYFINAL		71
 #define	YYFLAG		-32768
 #define	YYNTBASE	26
 
@@ -549,114 +571,113 @@ static const char yytranslate[] = {     0,
 
 #if YY_parse_DEBUG != 0
 static const short yyprhs[] = {     0,
-     0,     1,     4,     6,     8,    10,    16,    22,    25,    26,
-    28,    30,    32,    35,    38,    39,    43,    47,    52,    57,
-    59,    61,    63,    65,    67,    70,    71,    75,    79,    82,
-    83,    87,    91,    93,    95,    97,   101,   103,   105
+     0,     1,     4,     6,     8,    10,    14,    18,    22,    26,
+    29,    30,    32,    34,    36,    39,    43,    48,    53,    55,
+    57,    59,    61,    63,    66,    67,    71,    75,    78,    79,
+    83,    87,    89,    91,    93,    97,    99,   101,   103
 };
 
 static const short yyrhs[] = {    -1,
-    27,    26,     0,    30,     0,    29,     0,    28,     0,     5,
-    44,    17,    26,     9,     0,     6,    44,    17,    26,     9,
-     0,    31,    16,     0,     0,    35,     0,    32,     0,    36,
-     0,     7,    33,     0,    22,    34,     0,     0,    18,    22,
-    34,     0,    33,    15,    38,     0,     3,    19,    22,    20,
-     0,     4,    19,    37,    20,     0,    21,     0,    22,     0,
-    21,     0,    39,     0,     8,     0,    41,    40,     0,     0,
-    10,    41,    40,     0,    11,    41,    40,     0,    43,    42,
-     0,     0,    13,    43,    42,     0,    12,    43,    42,     0,
-    22,     0,    24,     0,    23,     0,    19,    39,    20,     0,
-    45,     0,     8,     0,    39,    14,    39,     0
+    27,    26,     0,    32,     0,    31,     0,    29,     0,     5,
+    44,    17,     0,    28,    26,     9,     0,     6,    44,    17,
+     0,    30,    26,     9,     0,    33,    16,     0,     0,    35,
+     0,    34,     0,    36,     0,     7,    22,     0,    22,    15,
+    38,     0,     3,    19,    22,    20,     0,     4,    19,    37,
+    20,     0,    21,     0,    22,     0,    21,     0,    39,     0,
+     8,     0,    41,    40,     0,     0,    10,    41,    40,     0,
+    11,    41,    40,     0,    43,    42,     0,     0,    13,    43,
+    42,     0,    12,    43,    42,     0,    22,     0,    24,     0,
+    23,     0,    19,    39,    20,     0,    45,     0,     8,     0,
+    22,     0,    39,    14,    39,     0
 };
 
 #endif
 
 #if (YY_parse_DEBUG != 0) || defined(YY_parse_ERROR_VERBOSE) 
 static const short yyrline[] = { 0,
-    38,    40,    43,    45,    46,    51,    57,    63,    67,    69,
-    70,    71,    75,    79,    83,    85,    88,    92,    94,    97,
-    99,   105,   107,   108,   112,   117,   119,   120,   123,   127,
-   129,   130,   133,   135,   136,   137,   140,   142,   144
+    67,    69,    72,    78,    89,   103,   114,   120,   130,   137,
+   141,   143,   144,   145,   149,   168,   207,   215,   218,   220,
+   231,   239,   247,   259,   281,   283,   319,   360,   381,   383,
+   420,   459,   472,   476,   480,   486,   488,   489,   496
 };
 
 static const char * const yytname[] = {   "$","error","$illegal.","READ","WRITE",
 "WHILE","IF","TYPE","BOOL","END","SUM","MINUS","DIV","MULT","REL_OP","ASSIGN",
 "SEMI_COLON","COLON","COMMA","LEFT_GROUP","RIGHT_GROUP","STRING","ID","FLOATING",
-"INTEGER","UNDEFINED","function_behavior","function_behavior_alpha","loop","if_statement",
-"function_line","function_line_alpha","var_init","multi_id","comma_id","var_assign",
-"method_call","write_parameter","expression","numerical_expression","numerical_expression_prime",
-"term","term_prime","factor","bool_expression","rel_expression",""
+"INTEGER","UNDEFINED","function_behavior","function_behavior_alpha","loop_init",
+"loop","if_init","if_statement","function_line","function_line_alpha","var_init",
+"var_assign","method_call","write_parameter","expression","numerical_expression",
+"numerical_expression_prime","term","term_prime","factor","bool_expression",
+"rel_expression",""
 };
 #endif
 
 static const short yyr1[] = {     0,
-    26,    26,    27,    27,    27,    28,    29,    30,    31,    31,
-    31,    31,    32,    33,    34,    34,    35,    36,    36,    37,
-    37,    38,    38,    38,    39,    40,    40,    40,    41,    42,
-    42,    42,    43,    43,    43,    43,    44,    44,    45
+    26,    26,    27,    27,    27,    28,    29,    30,    31,    32,
+    33,    33,    33,    33,    34,    35,    36,    36,    37,    37,
+    38,    38,    38,    39,    40,    40,    40,    41,    42,    42,
+    42,    43,    43,    43,    43,    44,    44,    44,    45
 };
 
 static const short yyr2[] = {     0,
-     0,     2,     1,     1,     1,     5,     5,     2,     0,     1,
-     1,     1,     2,     2,     0,     3,     3,     4,     4,     1,
-     1,     1,     1,     1,     2,     0,     3,     3,     2,     0,
-     3,     3,     1,     1,     1,     3,     1,     1,     3
+     0,     2,     1,     1,     1,     3,     3,     3,     3,     2,
+     0,     1,     1,     1,     2,     3,     4,     4,     1,     1,
+     1,     1,     1,     2,     0,     3,     3,     2,     0,     3,
+     3,     1,     1,     1,     3,     1,     1,     1,     3
 };
 
 static const short yydefact[] = {     1,
-     0,     0,     0,     0,     0,    15,     1,     5,     4,     3,
-     0,    11,     0,    10,    12,     0,     0,    38,     0,    33,
-    35,    34,     0,    26,    30,     0,    37,     0,    13,     0,
-    14,     2,     8,     0,     0,    20,    21,     0,     0,     0,
-     0,     0,    25,     0,     0,    29,     1,     1,    15,    24,
-    22,    17,    23,    18,    19,    36,    39,    26,    26,    30,
-    30,     0,     0,    16,    27,    28,    32,    31,     6,     7,
-     0,     0,     0
+     0,     0,     0,     0,     0,     0,     1,     1,     5,     1,
+     4,     3,     0,    13,    12,    14,     0,     0,    37,     0,
+    32,    34,    33,     0,    25,    29,     0,    36,     0,    15,
+     0,     2,     0,     0,    10,     0,    19,    20,     0,    32,
+     0,     0,     0,     0,    24,     0,     0,    28,     6,     8,
+    23,    21,    16,    22,     7,     9,    17,    18,    35,    39,
+    25,    25,    29,    29,    26,    27,    31,    30,     0,     0,
+     0
 };
 
 static const short yydefgoto[] = {    32,
-     7,     8,     9,    10,    11,    12,    13,    31,    14,    15,
-    38,    52,    23,    43,    24,    46,    25,    26,    27
+     7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
+    39,    53,    24,    45,    25,    48,    26,    27,    28
 };
 
-static const short yypact[] = {    -1,
-    -8,     5,    10,    10,    -5,    23,    -1,-32768,-32768,-32768,
-    28,-32768,    30,-32768,-32768,    24,   -14,-32768,    16,-32768,
--32768,-32768,    35,     3,    -3,    33,-32768,    34,-32768,    31,
--32768,-32768,-32768,     4,    32,-32768,-32768,    36,    37,    16,
-    16,    16,-32768,    16,    16,-32768,    -1,    -1,    23,-32768,
--32768,-32768,-32768,-32768,-32768,-32768,-32768,     3,     3,    -3,
-    -3,    45,    46,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
-    58,    59,-32768
+static const short yypact[] = {    -2,
+    24,    25,     8,     8,   -16,    30,    -2,    -2,-32768,    -2,
+-32768,-32768,    31,-32768,-32768,-32768,    26,   -13,-32768,    14,
+    29,-32768,-32768,    35,    18,     0,    33,-32768,    34,-32768,
+     2,-32768,    43,    44,-32768,    36,-32768,-32768,    37,-32768,
+    38,    14,    14,    14,-32768,    14,    14,-32768,-32768,-32768,
+-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
+    18,    18,     0,     0,-32768,-32768,-32768,-32768,    54,    55,
+-32768
 };
 
-static const short yypgoto[] = {     0,
--32768,-32768,-32768,-32768,-32768,-32768,    55,    12,-32768,-32768,
--32768,-32768,   -18,   -39,   -11,   -24,    -2,    60,-32768
+static const short yypgoto[] = {     7,
+-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
+-32768,-32768,   -20,   -43,    -9,   -24,    -5,    56,-32768
 };
 
 
-#define	YYLAST		64
+#define	YYLAST		60
 
 
-static const short yytable[] = {    71,
-    39,     1,     2,     3,     4,     5,    36,    37,    44,    45,
-    16,    50,    41,    42,    -9,    53,     6,    18,    65,    66,
-     6,    57,    19,    17,    51,    20,    21,    22,    19,    58,
-    59,    20,    21,    22,    19,    67,    68,    20,    21,    22,
-    30,    60,    61,    33,    34,    35,    62,    63,    40,    47,
-    48,    54,    49,    69,    70,    55,    56,    72,    73,    29,
-    64,     0,     0,    28
+static const short yytable[] = {    41,
+     1,     2,     3,     4,     5,    30,    69,    37,    38,    51,
+    54,    46,    47,   -11,    33,    19,    34,    65,    66,     6,
+    20,    60,    52,    40,    22,    23,    20,    43,    44,    21,
+    22,    23,    20,    61,    62,    40,    22,    23,    67,    68,
+    63,    64,    17,    18,    31,   -38,    35,    36,    42,    49,
+    50,    55,    56,    70,    71,    57,    58,    59,     0,    29
 };
 
-static const short yycheck[] = {     0,
-    19,     3,     4,     5,     6,     7,    21,    22,    12,    13,
-    19,     8,    10,    11,    16,    34,    22,     8,    58,    59,
-    22,    40,    19,    19,    21,    22,    23,    24,    19,    41,
-    42,    22,    23,    24,    19,    60,    61,    22,    23,    24,
-    18,    44,    45,    16,    15,    22,    47,    48,    14,    17,
-    17,    20,    22,     9,     9,    20,    20,     0,     0,     5,
-    49,    -1,    -1,     4
+static const short yycheck[] = {    20,
+     3,     4,     5,     6,     7,    22,     0,    21,    22,     8,
+    31,    12,    13,    16,     8,     8,    10,    61,    62,    22,
+    19,    42,    21,    22,    23,    24,    19,    10,    11,    22,
+    23,    24,    19,    43,    44,    22,    23,    24,    63,    64,
+    46,    47,    19,    19,    15,    17,    16,    22,    14,    17,
+    17,     9,     9,     0,     0,    20,    20,    20,    -1,     4
 };
 
 #line 352 "/usr/share/bison++/bison.cc"
@@ -1152,21 +1173,407 @@ YYLABEL(yyreduce)
 
   switch (yyn) {
 
-case 2:
-#line 40 "Parser.y"
-{printf("PROGRAM DONE\n");
-    break;}
 case 3:
-#line 44 "Parser.y"
-{printf("Line: ");printf(lineBuffer); printf("\n");
+#line 74 "Parser.y"
+{
+        printf("Line: ");printf(lineBuffer); printf("\n");
+        usleep(10000);
+    ;
     break;}
 case 4:
-#line 45 "Parser.y"
-{printf("If: ");printf(lineBuffer); printf("\n");
+#line 79 "Parser.y"
+{
+        printf("If: ");printf(lineBuffer); printf("\n");
+
+        res = Table.delete_scope();
+        if(res.error)
+        {
+            semantic_error(res);
+        }
+        usleep(10000);
+    ;
     break;}
 case 5:
-#line 46 "Parser.y"
-{printf("loop: ");printf(lineBuffer); printf("\n");
+#line 90 "Parser.y"
+{
+        printf("loop: ");printf(lineBuffer); printf("\n");
+        res = Table.delete_scope();
+        if(res.error)
+        {
+            semantic_error(res);
+        }
+        usleep(10000);
+    ;
+    break;}
+case 6:
+#line 105 "Parser.y"
+{
+        printf("loop_init\n");
+        res = Table.new_scope();
+        if(res.error)
+            semantic_error(res);
+        usleep(10000);
+    ;
+    break;}
+case 8:
+#line 122 "Parser.y"
+{
+        printf("if_init\n");
+        res = Table.new_scope();
+        if(res.error)
+            semantic_error(res);
+        usleep(10000);
+    ;
+    break;}
+case 15:
+#line 151 "Parser.y"
+{
+        res = Table.insert(yyvsp[0].text, yyvsp[-1].text);
+        if(res.error)
+            semantic_error(res);
+    ;
+    break;}
+case 16:
+#line 170 "Parser.y"
+{
+        string type1 = "";
+        string type2 = "";
+
+        res = Table.get_type(yyvsp[-2].text);
+        if(res.error)
+        {
+            semantic_error(res);
+            type1 = "undefined";
+        }
+        else
+        {
+            type1 = res.attribute;
+            semantic_result* casted_ptr = static_cast<semantic_result *> (yyvsp[0].expression_node);
+            res = *casted_ptr;
+            if(res.error)
+            {
+                semantic_error(res);
+                type2 = "undefined";
+            }
+            else
+            {
+                type2 = res.attribute;
+                res = get_type_relation(type1, type2);
+                if(res.error)
+                {
+                    semantic_error(res);
+                }
+                else
+                {
+                        //ESCRIBIR Codigo intermedio?
+                }
+            }
+        }
+    ;
+    break;}
+case 17:
+#line 209 "Parser.y"
+{
+        res = Table.get_type(yyvsp[-1].text);
+        if(res.error)
+            semantic_error(res);
+
+    ;
+    break;}
+case 20:
+#line 221 "Parser.y"
+{
+        res = Table.get_type(yyvsp[0].text);
+        if(res.error)
+            semantic_error(res);
+    ;
+    break;}
+case 21:
+#line 233 "Parser.y"
+{
+        semantic_result* res = new semantic_result;
+        res->error = false;
+        res->attribute = "string";
+        yyval.expression_node = res; 
+    ;
+    break;}
+case 22:
+#line 240 "Parser.y"
+{
+        semantic_result Node_res;        
+        node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
+        Node_res = casted_ptr -> define_type(); 
+        semantic_result* res = new semantic_result(Node_res);
+        yyval.expression_node = res;
+    ;
+    break;}
+case 23:
+#line 248 "Parser.y"
+{
+    semantic_result* res = new semantic_result;
+    res->error = false;
+    res->attribute = "bool";
+    yyval.expression_node = res;
+;
+    break;}
+case 24:
+#line 261 "Parser.y"
+{
+        if(yyvsp[0].expression_node == nullptr)
+        {
+            yyval.expression_node = yyvsp[-1].expression_node;
+        }
+        else
+        {
+            //assigning $1 (factor) as the leftmost leave of the $2 (term_prime) tree
+            //first, two auxiliar pointer casted as node*
+            node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
+            node* casted_ptr2 = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //Then,from casted_ptr we call insert_left_most
+            casted_ptr -> insert_left_most(casted_ptr2);
+            yyval.expression_node = casted_ptr;            
+        }
+    ;
+    break;}
+case 25:
+#line 282 "Parser.y"
+{yyval.expression_node = nullptr;
+    break;}
+case 26:
+#line 284 "Parser.y"
+{
+        if(yyvsp[0].expression_node == nullptr)
+        {
+            // The operator becomes the root node of a new three
+            node* ptr = new node(yyvsp[-2].text);
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+            yyval.expression_node = ptr;
+        }
+        else
+        {
+            //Realizar una operacion entre $3 y $2 --> Comprobacion de tipos
+            // res = type_system_numeric($3,$2,operator_aux);
+            
+            // The operator becomes the root node of a new tree
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+
+            //assigning the new tree as the leftmost leave of the $3 tree
+            //first, an auxiliar pointer casted as node*
+            node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
+
+            //Then,from casted_ptr2 we call insert_left_most
+            casted_ptr2 -> insert_left_most(ptr);
+            yyval.expression_node = casted_ptr2;
+        }
+    ;
+    break;}
+case 27:
+#line 320 "Parser.y"
+{
+        if(yyvsp[0].expression_node == nullptr)
+        {
+            // The operator becomes the root node of a new three
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+            yyval.expression_node = ptr;
+        }
+        else
+        {
+            //Realizar una operacion entre $3 y $2 --> Comprobacion de tipos
+            // res = type_system_numeric($3,$2,operator_aux);
+            
+            // The operator becomes the root node of a new tree
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+
+            //assigning the new tree as the leftmost leave of the $3 tree
+            //first, an auxiliar pointer casted as node*
+            node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
+
+            //Then,from casted_ptr2 we call insert_left_most
+            casted_ptr2 -> insert_left_most(ptr);
+            yyval.expression_node = casted_ptr2;
+        }
+    ;
+    break;}
+case 28:
+#line 362 "Parser.y"
+{
+        if(yyvsp[0].expression_node == nullptr)
+        {
+            yyval.expression_node = yyvsp[-1].expression_node;
+        }
+        else
+        {
+            //assigning $1 (factor) as the leftmost leave of the $2 (term_prime) tree
+            //first, two auxiliar pointer casted as node*
+            node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
+            node* casted_ptr2 = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //Then,from casted_ptr we call insert_left_most
+            casted_ptr -> insert_left_most(casted_ptr2);
+            yyval.expression_node = casted_ptr;            
+        }
+    ;
+    break;}
+case 29:
+#line 382 "Parser.y"
+{yyval.expression_node = nullptr;
+    break;}
+case 30:
+#line 384 "Parser.y"
+{
+        if(yyvsp[0].expression_node == nullptr)
+        {
+            // The operator becomes the root node of a new three
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+            yyval.expression_node = ptr;
+        }
+        else
+        {
+            //Realizar una operacion entre $3 y $2 --> Comprobacion de tipos
+            // res = type_system_numeric($3,$2,operator_aux);
+            
+            // The operator becomes the root node of a new tree
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+
+            //assigning the new tree as the leftmost leave of the $3 tree
+            //first, an auxiliar pointer casted as node*
+            node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
+
+            //Then,from casted_ptr2 we call insert_left_most
+            casted_ptr2 -> insert_left_most(ptr);
+            yyval.expression_node = casted_ptr2;
+        }
+    ;
+    break;}
+case 31:
+#line 421 "Parser.y"
+{
+        if(yyvsp[0].expression_node == nullptr)
+        {
+            // The operator becomes the root node of a new three
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+            yyval.expression_node = ptr;
+        }
+        else
+        {
+            //Realizar una operacion entre $3 y $2 --> Comprobacion de tipos
+            // res = type_system_numeric($3,$2,operator_aux);
+            
+            // The operator becomes the root node of a new tree
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 (factor) node, here it's being assigned as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+
+            //assigning the new tree as the leftmost leave of the $3 tree
+            //first, an auxiliar pointer casted as node*
+            node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
+
+            //Then,from casted_ptr2 we call insert_left_most
+            casted_ptr2 -> insert_left_most(ptr);
+            yyval.expression_node = casted_ptr2;
+        }
+    ;
+    break;}
+case 32:
+#line 461 "Parser.y"
+{            
+        res = Table.get_type(yyvsp[0].text);
+        if(!res.error)
+        {
+            yyval.expression_node = new node(yyvsp[0].text,to_char_ptr(res.attribute));
+        }
+        else
+        {
+            yyval.expression_node = new node(yyvsp[0].text);
+        }
+    ;
+    break;}
+case 33:
+#line 473 "Parser.y"
+{
+        yyval.expression_node = new node(yyvsp[0].text,"int");
+    ;
+    break;}
+case 34:
+#line 477 "Parser.y"
+{
+        yyval.expression_node = new node(yyvsp[0].text,"float");
+    ;
+    break;}
+case 35:
+#line 481 "Parser.y"
+{
+        yyval.expression_node = yyvsp[-1].expression_node;
+    ;
+    break;}
+case 38:
+#line 490 "Parser.y"
+{
+        res = Table.get_type(yyvsp[0].text);
+        if(res.error)
+            semantic_error(res);
+    ;
+    break;}
+case 39:
+#line 498 "Parser.y"
+{
+        node* casted_ptr = static_cast<node *> (yyvsp[-2].expression_node);
+        node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
+        res = casted_ptr -> define_type();
+        if(res.error)
+            semantic_error(res);
+        else
+        {
+            res = casted_ptr2 -> define_type();
+            if(res.error)
+                semantic_error(res); 
+        }        
+    ;
     break;}
 }
 
@@ -1372,4 +1779,95 @@ YYLABEL(yyerrhandle)
 /* END */
 
  #line 1038 "/usr/share/bison++/bison.cc"
-#line 169 "Parser.y"
+#line 534 "Parser.y"
+
+
+void semantic_error(semantic_result res)
+{
+//     if(!semantic_error_counter)
+//     {
+        cout<<"\n---semantic error in line "<<yylineno<<" : << "<<lineBuffer<< " >> "<<res.message<<" ---";
+    //     semantic_error_counter = true;
+    // }
+
+}
+
+void yyerror (char* s)
+{
+    printf("\n---%s in line %d : << %s >>---", s, yylineno, lineBuffer);
+}
+
+char* to_char_ptr (const string& str)
+{
+    char* char_ptr = new char[str.length() +1];
+    strcpy(char_ptr, str.c_str());
+    return char_ptr;
+}
+
+semantic_result get_type_relation(string type1, string type2)
+{
+    semantic_result res;
+    if(type1 == "string" && type2 == "string")
+    {
+        res.error = false;
+    }
+    else if(type1 == "int" && type2 == "int")
+    {
+        res.error = false;
+    }
+    else if(type1 == "float" && type2 == "float")
+    {
+        res.error = false;
+    }
+    else if(type1 == "bool" && type2 == "bool")
+    {
+        res.error = false;
+    }
+    else if(type1 == "float" && type2 == "int")
+    {
+        res.error = false;
+    }
+    else if(type1 == "int" && type2 == "float")
+    {
+        res.error = false;
+    }
+    else
+    {
+        res.error = true;
+        res.message = "Incompatible types in assigning operation.";
+    }
+    return res;
+}
+
+int main(int argc, char** argv) {
+    clock_t start_time, end_time;
+    double execution_time;
+
+    start_time = clock();  // Get the initial clock time
+
+    FILE* file = fopen(argv[1], "r");
+    if (!file) {
+        perror("fopen");
+        return 1;
+    }
+
+    yyin = file;
+
+    yyparse();
+
+    fclose(file);
+
+    end_time = clock();  // Get the final clock time
+
+    // Calculate the execution time in seconds
+    execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+
+    printf("Finalizado...\n");
+
+    // if (B == 1)
+    //     printf("\n\nParseo no finalizado debido a errores, tiempo de ejecucion: %.20f segundos\n", execution_time);
+    // else
+    //     printf("\n\nParseo completado sin errores, tiempo de ejecucion: %.20f segundos\n", execution_time);
+
+    return 0;
+}
