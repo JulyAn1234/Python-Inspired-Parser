@@ -11,3 +11,8 @@ To run, you can simple execute the .exe from console like this / Para correrlo, 
 ## Tools used
 C language with Flex and Bison. / Lenguaje C con Flex y Bison.
 
+## TO COMPILE
+
+flex Lexer.l
+bison -d Parser.y
+g++ -o parser_exe lex.yy.c Parser.tab.c sym_table.cpp -lfl
