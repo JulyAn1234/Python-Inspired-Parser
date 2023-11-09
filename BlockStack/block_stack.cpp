@@ -65,9 +65,10 @@ string block_stack::add_line(string line)
     }
 }
 
-string block_stack::new_if_block(string condition){
+string block_stack::new_if_block(string condition_quadruples,string condition){
     try
     {
+        add_line(condition_quadruples);
         add_line("if "+condition+" goto L"+to_string(count));
         string label = "L"+ to_string(count) + ":";
         count++;
@@ -78,7 +79,6 @@ string block_stack::new_if_block(string condition){
     {
         return "Error: " + string(e.what())+ "\n";
     }
-
 }
 
 string block_stack::delete_if_block(){
@@ -107,8 +107,65 @@ string block_stack::delete_if_block(){
     }
 }
 
-string block_stack::write_file(string file_name)
-{
+string block_stack::new_loop_block(string condition_quadruples, string condition){
+    try
+    {
+        // sym_link_to_condition is supposed to be the Link the last goto of the loop should have
+        //how can I implement it in the delete_loop_block function?
+        //maybe I can add a new stack for the sym_link_to_condition
+        int sym_link_to_condition = count;
+        //The sym_link_to_condition is added to the stack so 
+            //it can be used in the delete_loop_block function
+        sym_link_to_condition_in_loop.push(sym_link_to_condition);
+        add_line("L"+to_string(count)+": "+condition_quadruples);
+        count++;
+        add_line("if "+condition+" goto L"+to_string(count));
+        string label = "L"+ to_string(count) + ":";
+        count++;
+        block_stack_property.push(new string(label));
+        return "Added loop block " + label + " successfully\n";
+    }
+    catch(const std::exception& e)
+    {
+        return "Error: " + string(e.what())+ "\n";
+    }
+}
+
+string block_stack::delete_loop_block(){
+    try
+    {
+        string* current_block = block_stack_property.top();
+        if (current_block != nullptr) {
+            // Edit the content of the string pointed to by the top pointer
+            string loop_content = *current_block;
+            // sym_link_to_condition is supposed to be the Link the last goto of the loop should have
+            int sym_link_to_condition = get_sym_link_to_condition_in_loop();
+            loop_content = "goto L"+to_string(count)+"\n"+loop_content+"\ngoto L"+to_string(sym_link_to_condition);
+            cout << "loop_content looks like this:" << loop_content << endl;
+            delete current_block;
+            // cout<<"current_block deleted:"<<*current_block<<endl;
+            block_stack_property.pop();
+            add_line(loop_content);
+            add_line("L"+to_string(count)+":");
+            count++;
+            return "Deleted loop block successfully\n";
+        } else {
+            return "Top pointer is null:\n";
+        }
+    }
+    catch(const std::exception& e)
+    {
+        return "Error: " + string(e.what())+ "\n";
+    }
+}
+
+int block_stack::get_sym_link_to_condition_in_loop(){
+    int sym_link_to_condition = sym_link_to_condition_in_loop.top();
+    sym_link_to_condition_in_loop.pop();
+    return sym_link_to_condition;
+}
+
+string block_stack::write_file(string file_name){
     try{
         ofstream file(file_name, ios::app);
         if (file.is_open()) {
