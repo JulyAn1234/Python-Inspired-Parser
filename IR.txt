@@ -1,0 +1,18 @@
+L0: float b
+int a
+int x
+int y
+int z
+L1: @t1 = z
+if @t1 goto L2
+goto L3
+L2:@t1 = read()
+z = @t1
+@t1 = 43
+@t2 = 423
+@t1 = @t1 + @t2
+z = @t1
+
+goto L1
+L3:
+

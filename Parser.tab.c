@@ -108,6 +108,7 @@ Maintained by Magnus Ekdahl <magnus@debian.org>
 #include <time.h>
 #include <string>
 #include <unistd.h>
+#include "block_stack.h"
 //#include <>
 
 //Prototipos y externos, se rompe todo si no estan...
@@ -123,8 +124,10 @@ extern int yylineno;
 
 sym_table Table;
 semantic_result res;
+block_stack block_stack;
+int error_count =0;
 
-#line 27 "Parser.y"
+#line 30 "Parser.y"
 typedef union
 {
     char *text;
@@ -595,10 +598,10 @@ static const short yyrhs[] = {    -1,
 
 #if (YY_parse_DEBUG != 0) || defined(YY_parse_ERROR_VERBOSE) 
 static const short yyrline[] = { 0,
-    67,    69,    72,    78,    89,   103,   114,   120,   130,   137,
-   141,   143,   144,   145,   149,   168,   207,   215,   218,   220,
-   231,   239,   247,   259,   281,   283,   319,   360,   381,   383,
-   420,   459,   472,   476,   480,   486,   488,   489,   496
+    72,    74,    77,    83,    95,   110,   132,   138,   159,   166,
+   170,   172,   173,   174,   178,   201,   253,   267,   270,   277,
+   293,   301,   309,   321,   343,   345,   381,   422,   443,   445,
+   482,   521,   534,   538,   542,   548,   561,   572,   592
 };
 
 static const char * const yytname[] = {   "$","error","$illegal.","READ","WRITE",
@@ -1174,14 +1177,14 @@ YYLABEL(yyreduce)
   switch (yyn) {
 
 case 3:
-#line 74 "Parser.y"
+#line 79 "Parser.y"
 {
         printf("Line: ");printf(lineBuffer); printf("\n");
         usleep(10000);
     ;
     break;}
 case 4:
-#line 79 "Parser.y"
+#line 84 "Parser.y"
 {
         printf("If: ");printf(lineBuffer); printf("\n");
 
@@ -1190,11 +1193,12 @@ case 4:
         {
             semantic_error(res);
         }
+        block_stack.delete_if_block();
         usleep(10000);
     ;
     break;}
 case 5:
-#line 90 "Parser.y"
+#line 96 "Parser.y"
 {
         printf("loop: ");printf(lineBuffer); printf("\n");
         res = Table.delete_scope();
@@ -1202,42 +1206,72 @@ case 5:
         {
             semantic_error(res);
         }
+        block_stack.delete_loop_block();
         usleep(10000);
     ;
     break;}
 case 6:
-#line 105 "Parser.y"
+#line 112 "Parser.y"
 {
         printf("loop_init\n");
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
-        usleep(10000);
+        else{
+            semantic_result* casted_ptr = static_cast<semantic_result *> (yyvsp[-1].expression_node);
+            res = *casted_ptr;
+            if(res.error)
+                semantic_error(res);
+            else{
+                string quadruple = res.IR_node_quadruple;
+                string condition = res.IR_node_identifier;
+                block_stack.new_loop_block(quadruple, condition);
+                usleep(10000);                
+            }
+        }
     ;
     break;}
 case 8:
-#line 122 "Parser.y"
+#line 140 "Parser.y"
 {
         printf("if_init\n");
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
-        usleep(10000);
+        else{
+            semantic_result* casted_ptr = static_cast<semantic_result *> (yyvsp[-1].expression_node);
+            res = *casted_ptr;
+            if(res.error)
+                semantic_error(res);
+            else{
+                string quadruple = res.IR_node_quadruple;
+                string condition = res.IR_node_identifier;
+                block_stack.new_if_block(quadruple, condition);
+                usleep(10000);                
+            }
+        }            
     ;
     break;}
 case 15:
-#line 151 "Parser.y"
+#line 180 "Parser.y"
 {
         res = Table.insert(yyvsp[0].text, yyvsp[-1].text);
         if(res.error)
             semantic_error(res);
+        string type(yyvsp[-1].text);
+        string id(yyvsp[0].text);
+        string new_line = type+" "+id;
+        block_stack.add_line(new_line);
     ;
     break;}
 case 16:
-#line 170 "Parser.y"
+#line 203 "Parser.y"
 {
         string type1 = "";
         string type2 = "";
+        string expression_quadruple="";
+        string expression_identifier="";
+        string assign_quadruple="";
 
         res = Table.get_type(yyvsp[-2].text);
         if(res.error)
@@ -1258,6 +1292,8 @@ case 16:
             else
             {
                 type2 = res.attribute;
+                expression_quadruple = res.IR_node_quadruple;
+                expression_identifier = res.IR_node_identifier;
                 res = get_type_relation(type1, type2);
                 if(res.error)
                 {
@@ -1265,31 +1301,56 @@ case 16:
                 }
                 else
                 {
-                        //ESCRIBIR Codigo intermedio?
+                    //ESCRIBIR Codigo intermedio?
+                    cout<<"expression id:"<<expression_identifier<<endl;
+                    string assign_identifier(yyvsp[-2].text);
+                    assign_quadruple = assign_identifier+" = "+expression_identifier;
+                    assign_quadruple = expression_quadruple +"\n" + assign_quadruple;
+                    block_stack.add_line(assign_quadruple);
+
+                    // string new_line("t1 = 1+2\na = t1");
+                    // block_stack.add_line(new_line);
                 }
             }
         }
     ;
     break;}
 case 17:
-#line 209 "Parser.y"
+#line 256 "Parser.y"
 {
         res = Table.get_type(yyvsp[-1].text);
         if(res.error)
             semantic_error(res);
-
+        else{
+            string id(yyvsp[-1].text);
+            string new_line("@t1 = read()\n"+id+" = @t1");
+            block_stack.add_line(new_line);
+        }
+    ;
+    break;}
+case 19:
+#line 272 "Parser.y"
+{
+        string id(yyvsp[0].text);
+        string new_line("@t1 = "+id+"\nwrite(@t1)");
+        block_stack.add_line(new_line);
     ;
     break;}
 case 20:
-#line 221 "Parser.y"
+#line 278 "Parser.y"
 {
         res = Table.get_type(yyvsp[0].text);
         if(res.error)
             semantic_error(res);
+        else{
+            string id(yyvsp[0].text);
+            string new_line("@t1 = "+id+"\nwrite(@t1)");
+            block_stack.add_line(new_line);
+        }
     ;
     break;}
 case 21:
-#line 233 "Parser.y"
+#line 295 "Parser.y"
 {
         semantic_result* res = new semantic_result;
         res->error = false;
@@ -1298,17 +1359,17 @@ case 21:
     ;
     break;}
 case 22:
-#line 240 "Parser.y"
+#line 302 "Parser.y"
 {
         semantic_result Node_res;        
         node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
-        Node_res = casted_ptr -> define_type(); 
+        Node_res = casted_ptr -> define_type(0); 
         semantic_result* res = new semantic_result(Node_res);
         yyval.expression_node = res;
     ;
     break;}
 case 23:
-#line 248 "Parser.y"
+#line 310 "Parser.y"
 {
     semantic_result* res = new semantic_result;
     res->error = false;
@@ -1317,7 +1378,7 @@ case 23:
 ;
     break;}
 case 24:
-#line 261 "Parser.y"
+#line 323 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1337,11 +1398,11 @@ case 24:
     ;
     break;}
 case 25:
-#line 282 "Parser.y"
+#line 344 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
 case 26:
-#line 284 "Parser.y"
+#line 346 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1379,7 +1440,7 @@ case 26:
     ;
     break;}
 case 27:
-#line 320 "Parser.y"
+#line 382 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1418,7 +1479,7 @@ case 27:
     ;
     break;}
 case 28:
-#line 362 "Parser.y"
+#line 424 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1438,11 +1499,11 @@ case 28:
     ;
     break;}
 case 29:
-#line 382 "Parser.y"
+#line 444 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
 case 30:
-#line 384 "Parser.y"
+#line 446 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1481,7 +1542,7 @@ case 30:
     ;
     break;}
 case 31:
-#line 421 "Parser.y"
+#line 483 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1520,7 +1581,7 @@ case 31:
     ;
     break;}
 case 32:
-#line 461 "Parser.y"
+#line 523 "Parser.y"
 {            
         res = Table.get_type(yyvsp[0].text);
         if(!res.error)
@@ -1534,44 +1595,104 @@ case 32:
     ;
     break;}
 case 33:
-#line 473 "Parser.y"
+#line 535 "Parser.y"
 {
         yyval.expression_node = new node(yyvsp[0].text,"int");
     ;
     break;}
 case 34:
-#line 477 "Parser.y"
+#line 539 "Parser.y"
 {
         yyval.expression_node = new node(yyvsp[0].text,"float");
     ;
     break;}
 case 35:
-#line 481 "Parser.y"
+#line 543 "Parser.y"
 {
         yyval.expression_node = yyvsp[-1].expression_node;
     ;
     break;}
-case 38:
-#line 490 "Parser.y"
+case 36:
+#line 550 "Parser.y"
 {
+        // semantic_result* casted_ptr = static_cast<semantic_result *> ($1);
+        // res = *casted_ptr;
+        // if(res.error){
+        //     $$ = $1;
+        // }
+        // else{
+        //     $$ = $1;
+        // }
+        yyval.expression_node = yyvsp[0].expression_node;
+    ;
+    break;}
+case 37:
+#line 562 "Parser.y"
+{
+        string bool_value(yyvsp[0].text);
+        string new_line("@t1 = " +bool_value);
+        semantic_result* res_bool = new semantic_result;
+        res_bool->error = false;
+        res_bool->attribute = "bool";
+        res_bool->IR_node_quadruple = new_line;
+        res_bool->IR_node_identifier = "@t1";        
+        yyval.expression_node = res_bool;
+    ;
+    break;}
+case 38:
+#line 573 "Parser.y"
+{
+        semantic_result* res_bool = new semantic_result;
         res = Table.get_type(yyvsp[0].text);
-        if(res.error)
+        if(res.error){
             semantic_error(res);
+            res_bool->error = true;
+            yyval.expression_node = res_bool;
+        }    
+        else{
+            string id(yyvsp[0].text);
+            string new_line("@t1 = "+id);
+            res_bool->error = false;
+            res_bool->attribute = "bool";
+            res_bool->IR_node_quadruple = new_line;
+            res_bool->IR_node_identifier = "@t1";
+            yyval.expression_node = res_bool;
+        }
     ;
     break;}
 case 39:
-#line 498 "Parser.y"
+#line 594 "Parser.y"
 {
+        semantic_result* res_bool = new semantic_result;
         node* casted_ptr = static_cast<node *> (yyvsp[-2].expression_node);
         node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
-        res = casted_ptr -> define_type();
-        if(res.error)
+        res = casted_ptr -> define_type(0);
+        if(res.error){
             semantic_error(res);
+            res_bool->error = true;
+            yyval.expression_node = res_bool;
+        }
         else
         {
-            res = casted_ptr2 -> define_type();
-            if(res.error)
-                semantic_error(res); 
+            string quadruple1 = res.IR_node_quadruple;
+            string identifier1 = res.IR_node_identifier;
+            res = casted_ptr2 -> define_type(1);
+            if(res.error){
+                semantic_error(res);
+                res_bool->error = true;
+                yyval.expression_node = res_bool;    
+            }else{
+                string quadruple2 = res.IR_node_quadruple;
+                string identifier2 = res.IR_node_identifier;
+                string rel_op(yyvsp[-1].text);
+                string new_line("@t1 = "+identifier1+rel_op+identifier2);
+                new_line = quadruple1+"\n"+quadruple2+"\n"+new_line;
+                res_bool->error = false;
+                res_bool->attribute = "bool";
+                res_bool->IR_node_quadruple = new_line;
+                res_bool->IR_node_identifier = "@t1";
+                yyval.expression_node = res_bool;
+            } 
         }        
     ;
     break;}
@@ -1779,13 +1900,14 @@ YYLABEL(yyerrhandle)
 /* END */
 
  #line 1038 "/usr/share/bison++/bison.cc"
-#line 534 "Parser.y"
+#line 650 "Parser.y"
 
 
 void semantic_error(semantic_result res)
 {
 //     if(!semantic_error_counter)
 //     {
+        error_count++;
         cout<<"\n---semantic error in line "<<yylineno<<" : << "<<lineBuffer<< " >> "<<res.message<<" ---";
     //     semantic_error_counter = true;
     // }
@@ -1794,6 +1916,7 @@ void semantic_error(semantic_result res)
 
 void yyerror (char* s)
 {
+    error_count++;
     printf("\n---%s in line %d : << %s >>---", s, yylineno, lineBuffer);
 }
 
@@ -1863,7 +1986,8 @@ int main(int argc, char** argv) {
     execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
     printf("Finalizado...\n");
-
+    if(error_count==0)
+        block_stack.write_file("IR.txt");
     // if (B == 1)
     //     printf("\n\nParseo no finalizado debido a errores, tiempo de ejecucion: %.20f segundos\n", execution_time);
     // else

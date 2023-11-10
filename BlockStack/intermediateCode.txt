@@ -1,32 +1,10 @@
 L0: hola
 hola2
 hola3
-L1: t1=x>y
-if t1 goto L2
-goto L9
-L2:L3: t1=x>y
-if t1 goto L4
-goto L8
-L4:if_action_1
-L5: t1=x>y
-if t1 goto L6
-goto L7
-L6:if_action_2
+t1= b+c
+t2=a+t1
+a= t2
 
-goto L5
-L7:
-After_action_1
-
-goto L3
-L8:
-
-goto L1
-L9:
-After_action_2
-
-L0: hola
-hola2
-hola3
 L1: t1=x>y
 if t1 goto L2
 goto L9

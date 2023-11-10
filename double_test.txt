@@ -1,12 +1,10 @@
 float b;
 int a;
-b=3;
-a=3;
+int x;
+int y;
+int z;
 
-if b==a:
-    write("");
-end
-
-while b>a:
-    write("");
+while z:
+    read(z);
+    z = 43+423;
 end

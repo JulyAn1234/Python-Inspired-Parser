@@ -13,6 +13,9 @@ struct semantic_result
     bool error;
     string message;
     string attribute;
+    string IR_node_quadruple;
+    string IR_node_identifier;
+    int IR_temp_variable_counter;
 };
 
 struct temp_node
@@ -39,7 +42,7 @@ class node
         node* get_right_node();
         void insert_left_most(node* node_ptr);
         string post_order_traversal();
-        semantic_result define_type();
+        semantic_result define_type(int temp_variable_counter);
         semantic_result type_system(char* type1, char* type2, char* op);
         char* to_char_ptr (const string& str);
 };

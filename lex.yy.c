@@ -838,7 +838,7 @@ YY_RULE_SETUP
 case 6:
 YY_RULE_SETUP
 #line 20 "Lexer.l"
-{strcat(lineBuffer, yytext); return BOOL;}
+{strcat(lineBuffer, yytext); yylval.text = (char *) strdup(yytext); return BOOL;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
@@ -868,7 +868,7 @@ YY_RULE_SETUP
 case 12:
 YY_RULE_SETUP
 #line 26 "Lexer.l"
-{strcat(lineBuffer, yytext); return REL_OP;}
+{strcat(lineBuffer, yytext); yylval.text = (char *) strdup(yytext); return REL_OP;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
@@ -903,7 +903,7 @@ YY_RULE_SETUP
 case 19:
 YY_RULE_SETUP
 #line 33 "Lexer.l"
-{strcat(lineBuffer, yytext); return STRING;}
+{strcat(lineBuffer, yytext);yylval.text = (char *) strdup(yytext); return STRING;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP

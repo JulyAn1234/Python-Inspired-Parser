@@ -115,8 +115,8 @@ while a==b:
               var91 + var92 + var93 + var94 + var95 + var96 + var97 + var98 + var99 + var100;
 end
 
-string s;
-s = "100 variables deleted :)";
-write(s);
-read(var51);
-write(var51);
+//string s;
+//s = "100 variables deleted :)";
+//write(s);
+//read(var51);
+//write(var51);

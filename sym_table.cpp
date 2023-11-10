@@ -235,17 +235,22 @@ string node::post_order_traversal()
     return traversal;
 }
 
-semantic_result node::define_type()
+semantic_result node::define_type(int temp_variable_counter)
 {
     semantic_result res;
     char* type1 = nullptr;
     char* type2 = nullptr;
-    char* op = nullptr; 
+    char* op = nullptr;
+    string quadruple_1;
+    string quadruple_2;
+    string identifier_1;
+    string identifier_2;
     //Recorriendo el camino izquierdo...
 
+    //Caso hijo izq no es nullptr, recorrerlo
     if(left_node != nullptr)
     {
-        res = left_node -> define_type();
+        res = left_node -> define_type(temp_variable_counter);
         if(res.error)
         {
             return res;
@@ -253,6 +258,9 @@ semantic_result node::define_type()
         else
         {
             type1 = to_char_ptr(res.attribute);
+            quadruple_1 = res.IR_node_quadruple;
+            identifier_1 = res.IR_node_identifier;
+            temp_variable_counter = res.IR_temp_variable_counter;
         }
     }        
     //Caso hijo izq nullptr
@@ -261,9 +269,22 @@ semantic_result node::define_type()
         //leaf node...
         if(type != nullptr)
         {
+            //creando variable temporal
+            temp_variable_counter++;
+            string node_identifier = "@t"+to_string(temp_variable_counter);
+            cout<<"node_id"<<node_identifier<<endl;
+            string node_quadruple = node_identifier+" = "+string(data);
+            cout<<"node_quad"<<node_quadruple<<endl;
             res.error = false;
             res.attribute = type;
             res.message = "Type retrieved succesfully.";
+            //sending left node data
+            cout<<"PASE POR AQUI"<<endl;
+            res.IR_node_identifier = node_identifier;
+
+            res.IR_node_quadruple = node_quadruple;
+            cout<<"SENT node_quad"<<res.IR_node_quadruple<<endl;
+            res.IR_temp_variable_counter = temp_variable_counter;
             return res;    
         }
         //Nodo operador sin hijo izq, hubo un error de sintaxis. En teoria esto no deberia pasar...
@@ -273,7 +294,7 @@ semantic_result node::define_type()
             res.message= "Bad expression, missing operand.";
             return res;
         }
-        //Pasa cuando un ID no estuvo definido en la tabla
+        //Pasa cuando un ID no estuvo definido en la tabla, Tampoco deberia pasar...
         else
         {
             res.error = true;
@@ -298,7 +319,7 @@ semantic_result node::define_type()
     //Recorrido derecho
     if(right_node != nullptr)
     {
-        res = right_node -> define_type();
+        res = right_node -> define_type(temp_variable_counter);
         if(res.error)
         {
             return res;
@@ -306,6 +327,9 @@ semantic_result node::define_type()
         else
         {
             type2 = to_char_ptr(res.attribute);
+            quadruple_2 = res.IR_node_quadruple;
+            identifier_2 = res.IR_node_identifier;
+            temp_variable_counter = res.IR_temp_variable_counter;
         }
     }        
     //Caso hijo der nullptr
@@ -314,9 +338,18 @@ semantic_result node::define_type()
         //leaf node...
         if(type != nullptr)
         {
+            //creando variable temporal
+            temp_variable_counter++;
+            string node_identifier = "@t"+to_string(temp_variable_counter);
+            string node_quadruple = node_identifier+" = "+string(data);
+            
             res.error = false;
             res.attribute = type;
             res.message = "Type retrieved succesfully.";
+            //sending right node data
+            res.IR_node_identifier = node_identifier;
+            res.IR_node_quadruple = node_quadruple;
+            res.IR_temp_variable_counter = temp_variable_counter;
             return res;    
         }
         //Nodo operador sin hijo izq, hubo un error de sintaxis. En teoria esto no deberia pasar...
@@ -335,7 +368,30 @@ semantic_result node::define_type()
         }        
     }
 
-    return type_system(type1, type2, op);
+    res = type_system(type1, type2, op);
+    if(res.error){
+        return res;
+    }
+    else{
+        res.error = false;
+        res.message = "Type retrieved succesfully.";
+        res.attribute = res.attribute;
+        //creando variable temporal
+        //Intentemos reducir el numero de variables temporales creadas restando uno al contador, pero después de probarlo...
+        temp_variable_counter--;
+        string node_identifier = "@t"+to_string(temp_variable_counter);
+        string node_quadruple = node_identifier+" = "+identifier_1+" "+string(op)+" "+identifier_2;
+        
+        //joining quadruples
+        node_quadruple = quadruple_1 + "\n" + quadruple_2 + "\n" + node_quadruple;
+        
+        //sending node data
+        res.IR_node_identifier = node_identifier;
+        res.IR_node_quadruple = node_quadruple;
+        cout<<"SENT node_quad"<<res.IR_node_quadruple<<endl;
+        res.IR_temp_variable_counter = temp_variable_counter;
+        return res;
+    }
 }
 
 semantic_result node::type_system(char* type1, char* type2, char* op)

@@ -25,10 +25,8 @@ block_stack::block_stack()
 
 block_stack::~block_stack()
 {
+
     while (!block_stack_property.empty()) {
-        // if(block_stack_property.size() ==1){
-        //     write_file("intermediateCode.txt");            
-        // }
         delete block_stack_property.top();
         block_stack_property.pop();
     }
@@ -164,7 +162,6 @@ int block_stack::get_sym_link_to_condition_in_loop(){
     sym_link_to_condition_in_loop.pop();
     return sym_link_to_condition;
 }
-
 string block_stack::write_file(string file_name) {
     try {
         std::ofstream file(file_name);  // Change ios::out to ios::trunc

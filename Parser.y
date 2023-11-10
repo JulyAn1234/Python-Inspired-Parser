@@ -7,6 +7,7 @@
 #include <time.h>
 #include <string>
 #include <unistd.h>
+#include "block_stack.h"
 //#include <>
 
 //Prototipos y externos, se rompe todo si no estan...
@@ -22,6 +23,8 @@ extern int yylineno;
 
 sym_table Table;
 semantic_result res;
+block_stack block_stack;
+int error_count =0;
 %}
 
 %union
@@ -36,26 +39,28 @@ semantic_result res;
 %type <expression_node> numerical_expression
 %type <expression_node> numerical_expression_prime
 %type <expression_node> expression
+%type <expression_node> bool_expression
+%type <expression_node> rel_expression
 
 %token READ
 %token WRITE
 %token WHILE
 %token IF
 %token <text> TYPE
-%token BOOL
+%token <text> BOOL
 %token END
 %token <text> SUM
 %token <text> MINUS
 %token <text> DIV
 %token <text> MULT
-%token REL_OP
+%token <text> REL_OP
 %token ASSIGN
 %token SEMI_COLON
 %token COLON
 %token COMMA
 %token LEFT_GROUP
 %token RIGHT_GROUP
-%token STRING
+%token <text> STRING
 %token <text> ID
 %token <text> FLOATING
 %token <text> INTEGER
@@ -84,6 +89,7 @@ function_behavior_alpha:
         {
             semantic_error(res);
         }
+        block_stack.delete_if_block();
         usleep(10000);
     }
 |   loop
@@ -94,6 +100,7 @@ function_behavior_alpha:
         {
             semantic_error(res);
         }
+        block_stack.delete_loop_block();
         usleep(10000);
     }
 ;
@@ -107,7 +114,18 @@ loop_init:
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
-        usleep(10000);
+        else{
+            semantic_result* casted_ptr = static_cast<semantic_result *> ($2);
+            res = *casted_ptr;
+            if(res.error)
+                semantic_error(res);
+            else{
+                string quadruple = res.IR_node_quadruple;
+                string condition = res.IR_node_identifier;
+                block_stack.new_loop_block(quadruple, condition);
+                usleep(10000);                
+            }
+        }
     }
 ;
 
@@ -124,7 +142,18 @@ if_init:
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
-        usleep(10000);
+        else{
+            semantic_result* casted_ptr = static_cast<semantic_result *> ($2);
+            res = *casted_ptr;
+            if(res.error)
+                semantic_error(res);
+            else{
+                string quadruple = res.IR_node_quadruple;
+                string condition = res.IR_node_identifier;
+                block_stack.new_if_block(quadruple, condition);
+                usleep(10000);                
+            }
+        }            
     }
 ;
 if_statement:
@@ -152,6 +181,10 @@ var_init:
         res = Table.insert($2, $1);
         if(res.error)
             semantic_error(res);
+        string type($1);
+        string id($2);
+        string new_line = type+" "+id;
+        block_stack.add_line(new_line);
     }
 ;
 
@@ -170,6 +203,9 @@ var_assign:
     {
         string type1 = "";
         string type2 = "";
+        string expression_quadruple="";
+        string expression_identifier="";
+        string assign_quadruple="";
 
         res = Table.get_type($1);
         if(res.error)
@@ -190,6 +226,8 @@ var_assign:
             else
             {
                 type2 = res.attribute;
+                expression_quadruple = res.IR_node_quadruple;
+                expression_identifier = res.IR_node_identifier;
                 res = get_type_relation(type1, type2);
                 if(res.error)
                 {
@@ -197,7 +235,15 @@ var_assign:
                 }
                 else
                 {
-                        //ESCRIBIR Codigo intermedio?
+                    //ESCRIBIR Codigo intermedio?
+                    cout<<"expression id:"<<expression_identifier<<endl;
+                    string assign_identifier($1);
+                    assign_quadruple = assign_identifier+" = "+expression_identifier;
+                    assign_quadruple = expression_quadruple +"\n" + assign_quadruple;
+                    block_stack.add_line(assign_quadruple);
+
+                    // string new_line("t1 = 1+2\na = t1");
+                    // block_stack.add_line(new_line);
                 }
             }
         }
@@ -205,23 +251,39 @@ var_assign:
 ;
 
 method_call:
+    //read gets input from user and assign to a variable
     READ LEFT_GROUP ID RIGHT_GROUP
     {
         res = Table.get_type($3);
         if(res.error)
             semantic_error(res);
-
+        else{
+            string id($3);
+            string new_line("@t1 = read()\n"+id+" = @t1");
+            block_stack.add_line(new_line);
+        }
     }
+    //write prints the value of a variable
 |   WRITE LEFT_GROUP write_parameter RIGHT_GROUP 
 ;
 
 write_parameter:
     STRING
+    {
+        string id($1);
+        string new_line("@t1 = "+id+"\nwrite(@t1)");
+        block_stack.add_line(new_line);
+    }
 |   ID
     {
         res = Table.get_type($1);
         if(res.error)
             semantic_error(res);
+        else{
+            string id($1);
+            string new_line("@t1 = "+id+"\nwrite(@t1)");
+            block_stack.add_line(new_line);
+        }
     }
 ;
 
@@ -240,7 +302,7 @@ expression:
     {
         semantic_result Node_res;        
         node* casted_ptr = static_cast<node *> ($1);
-        Node_res = casted_ptr -> define_type(); 
+        Node_res = casted_ptr -> define_type(0); 
         semantic_result* res = new semantic_result(Node_res);
         $$ = res;
     }
@@ -485,27 +547,81 @@ factor:
 
 bool_expression:
     rel_expression
+    {
+        // semantic_result* casted_ptr = static_cast<semantic_result *> ($1);
+        // res = *casted_ptr;
+        // if(res.error){
+        //     $$ = $1;
+        // }
+        // else{
+        //     $$ = $1;
+        // }
+        $$ = $1;
+    }
 |   BOOL
+    {
+        string bool_value($1);
+        string new_line("@t1 = " +bool_value);
+        semantic_result* res_bool = new semantic_result;
+        res_bool->error = false;
+        res_bool->attribute = "bool";
+        res_bool->IR_node_quadruple = new_line;
+        res_bool->IR_node_identifier = "@t1";        
+        $$ = res_bool;
+    }
 |   ID
     {
+        semantic_result* res_bool = new semantic_result;
         res = Table.get_type($1);
-        if(res.error)
+        if(res.error){
             semantic_error(res);
+            res_bool->error = true;
+            $$ = res_bool;
+        }    
+        else{
+            string id($1);
+            string new_line("@t1 = "+id);
+            res_bool->error = false;
+            res_bool->attribute = "bool";
+            res_bool->IR_node_quadruple = new_line;
+            res_bool->IR_node_identifier = "@t1";
+            $$ = res_bool;
+        }
     }
 ;
 rel_expression:
     numerical_expression REL_OP numerical_expression
     {
+        semantic_result* res_bool = new semantic_result;
         node* casted_ptr = static_cast<node *> ($1);
         node* casted_ptr2 = static_cast<node *> ($3);
-        res = casted_ptr -> define_type();
-        if(res.error)
+        res = casted_ptr -> define_type(0);
+        if(res.error){
             semantic_error(res);
+            res_bool->error = true;
+            $$ = res_bool;
+        }
         else
         {
-            res = casted_ptr2 -> define_type();
-            if(res.error)
-                semantic_error(res); 
+            string quadruple1 = res.IR_node_quadruple;
+            string identifier1 = res.IR_node_identifier;
+            res = casted_ptr2 -> define_type(1);
+            if(res.error){
+                semantic_error(res);
+                res_bool->error = true;
+                $$ = res_bool;    
+            }else{
+                string quadruple2 = res.IR_node_quadruple;
+                string identifier2 = res.IR_node_identifier;
+                string rel_op($2);
+                string new_line("@t1 = "+identifier1+rel_op+identifier2);
+                new_line = quadruple1+"\n"+quadruple2+"\n"+new_line;
+                res_bool->error = false;
+                res_bool->attribute = "bool";
+                res_bool->IR_node_quadruple = new_line;
+                res_bool->IR_node_identifier = "@t1";
+                $$ = res_bool;
+            } 
         }        
     }
 ;
@@ -537,6 +653,7 @@ void semantic_error(semantic_result res)
 {
 //     if(!semantic_error_counter)
 //     {
+        error_count++;
         cout<<"\n---semantic error in line "<<yylineno<<" : << "<<lineBuffer<< " >> "<<res.message<<" ---";
     //     semantic_error_counter = true;
     // }
@@ -545,6 +662,7 @@ void semantic_error(semantic_result res)
 
 void yyerror (char* s)
 {
+    error_count++;
     printf("\n---%s in line %d : << %s >>---", s, yylineno, lineBuffer);
 }
 
@@ -614,7 +732,8 @@ int main(int argc, char** argv) {
     execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
     printf("Finalizado...\n");
-
+    if(error_count==0)
+        block_stack.write_file("IR.txt");
     // if (B == 1)
     //     printf("\n\nParseo no finalizado debido a errores, tiempo de ejecucion: %.20f segundos\n", execution_time);
     // else
