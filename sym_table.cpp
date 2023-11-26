@@ -272,18 +272,14 @@ semantic_result node::define_type(int temp_variable_counter)
             //creando variable temporal
             temp_variable_counter++;
             string node_identifier = "@t"+to_string(temp_variable_counter);
-            cout<<"node_id"<<node_identifier<<endl;
             string node_quadruple = node_identifier+" = "+string(data);
-            cout<<"node_quad"<<node_quadruple<<endl;
             res.error = false;
             res.attribute = type;
             res.message = "Type retrieved succesfully.";
             //sending left node data
-            cout<<"PASE POR AQUI"<<endl;
             res.IR_node_identifier = node_identifier;
 
             res.IR_node_quadruple = node_quadruple;
-            cout<<"SENT node_quad"<<res.IR_node_quadruple<<endl;
             res.IR_temp_variable_counter = temp_variable_counter;
             return res;    
         }
@@ -388,7 +384,6 @@ semantic_result node::define_type(int temp_variable_counter)
         //sending node data
         res.IR_node_identifier = node_identifier;
         res.IR_node_quadruple = node_quadruple;
-        cout<<"SENT node_quad"<<res.IR_node_quadruple<<endl;
         res.IR_temp_variable_counter = temp_variable_counter;
         return res;
     }

@@ -78,7 +78,7 @@ function_behavior_alpha:
     function_line
     {
         printf("Line: ");printf(lineBuffer); printf("\n");
-        usleep(10000);
+        
     }
 |   if_statement
     {
@@ -90,7 +90,7 @@ function_behavior_alpha:
             semantic_error(res);
         }
         block_stack.delete_if_block();
-        usleep(10000);
+        
     }
 |   loop
     {
@@ -101,7 +101,7 @@ function_behavior_alpha:
             semantic_error(res);
         }
         block_stack.delete_loop_block();
-        usleep(10000);
+        
     }
 ;
 
@@ -123,7 +123,7 @@ loop_init:
                 string quadruple = res.IR_node_quadruple;
                 string condition = res.IR_node_identifier;
                 block_stack.new_loop_block(quadruple, condition);
-                usleep(10000);                
+                                
             }
         }
     }
@@ -151,7 +151,7 @@ if_init:
                 string quadruple = res.IR_node_quadruple;
                 string condition = res.IR_node_identifier;
                 block_stack.new_if_block(quadruple, condition);
-                usleep(10000);                
+                                
             }
         }            
     }
@@ -726,7 +726,7 @@ int main(int argc, char** argv) {
 
     fclose(file);
 
-    end_time = clock();  // Get the final clock time
+    end_time = clock();  // Get the final clock time*
 
     // Calculate the execution time in seconds
     execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;

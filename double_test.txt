@@ -1,10 +1,20 @@
-float b;
+float aa;
+aa = 2.0;
+int c;
+bool z;
+
+
 int a;
-int x;
-int y;
-int z;
+a = 100;
+int b;
+
+int d;
+int e;
+
+if a>2 :
+    e = (a + b * c) /( d - e +(12321.2/123*(123+12*123/12*(1+2))-(3+2*2)))/(2*121/(523+12)) ;
+end
 
 while z:
-    read(z);
-    z = 43+423;
+ //some code;
 end

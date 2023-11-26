@@ -1180,7 +1180,7 @@ case 3:
 #line 79 "Parser.y"
 {
         printf("Line: ");printf(lineBuffer); printf("\n");
-        usleep(10000);
+        
     ;
     break;}
 case 4:
@@ -1194,7 +1194,7 @@ case 4:
             semantic_error(res);
         }
         block_stack.delete_if_block();
-        usleep(10000);
+        
     ;
     break;}
 case 5:
@@ -1207,7 +1207,7 @@ case 5:
             semantic_error(res);
         }
         block_stack.delete_loop_block();
-        usleep(10000);
+        
     ;
     break;}
 case 6:
@@ -1226,7 +1226,7 @@ case 6:
                 string quadruple = res.IR_node_quadruple;
                 string condition = res.IR_node_identifier;
                 block_stack.new_loop_block(quadruple, condition);
-                usleep(10000);                
+                                
             }
         }
     ;
@@ -1247,7 +1247,7 @@ case 8:
                 string quadruple = res.IR_node_quadruple;
                 string condition = res.IR_node_identifier;
                 block_stack.new_if_block(quadruple, condition);
-                usleep(10000);                
+                                
             }
         }            
     ;
