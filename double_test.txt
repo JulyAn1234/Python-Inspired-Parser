@@ -3,9 +3,10 @@ aa = 2.0;
 int c;
 bool z;
 bool k;
+k=true;
 string bb;
 string cc;
-cc = bb;
+cc = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
 int a;
 a = 100;

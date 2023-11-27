@@ -109,8 +109,7 @@ Maintained by Magnus Ekdahl <magnus@debian.org>
 #include <string>
 #include <unistd.h>
 #include "block_stack.h"
-//#include <>
-
+#include "llvm_generator.h"
 //Prototipos y externos, se rompe todo si no estan...
 int yylex();
 extern FILE* yyin;
@@ -125,6 +124,7 @@ extern int yylineno;
 sym_table Table;
 semantic_result res;
 block_stack block_stack;
+llvm_generator* excalibur_builder = new llvm_generator();
 int error_count =0;
 
 #line 30 "Parser.y"
@@ -599,9 +599,9 @@ static const short yyrhs[] = {    -1,
 #if (YY_parse_DEBUG != 0) || defined(YY_parse_ERROR_VERBOSE) 
 static const short yyrline[] = { 0,
     72,    74,    77,    83,    95,   110,   132,   138,   159,   166,
-   170,   172,   173,   174,   178,   201,   253,   267,   270,   277,
-   293,   301,   309,   321,   343,   345,   381,   422,   443,   445,
-   482,   521,   534,   538,   542,   548,   561,   572,   592
+   170,   172,   173,   174,   178,   202,   265,   279,   282,   289,
+   305,   319,   327,   344,   366,   368,   404,   445,   466,   468,
+   505,   544,   557,   561,   565,   571,   584,   595,   615
 };
 
 static const char * const yytname[] = {   "$","error","$illegal.","READ","WRITE",
@@ -1255,7 +1255,8 @@ case 8:
 case 15:
 #line 180 "Parser.y"
 {
-        res = Table.insert(yyvsp[0].text, yyvsp[-1].text);
+        int sym_link = excalibur_builder->add_static_declaration(yyvsp[-1].text);
+        res = Table.insert(yyvsp[0].text, yyvsp[-1].text, sym_link);
         if(res.error)
             semantic_error(res);
         string type(yyvsp[-1].text);
@@ -1265,10 +1266,12 @@ case 15:
     ;
     break;}
 case 16:
-#line 203 "Parser.y"
+#line 204 "Parser.y"
 {
         string type1 = "";
         string type2 = "";
+        string constant_value = "";
+        int variable_link=0;
         string expression_quadruple="";
         string expression_identifier="";
         string assign_quadruple="";
@@ -1282,6 +1285,7 @@ case 16:
         else
         {
             type1 = res.attribute;
+            variable_link = res.sym_link;
             semantic_result* casted_ptr = static_cast<semantic_result *> (yyvsp[0].expression_node);
             res = *casted_ptr;
             if(res.error)
@@ -1292,6 +1296,7 @@ case 16:
             else
             {
                 type2 = res.attribute;
+                constant_value = res.message;
                 expression_quadruple = res.IR_node_quadruple;
                 expression_identifier = res.IR_node_identifier;
                 res = get_type_relation(type1, type2);
@@ -1302,6 +1307,13 @@ case 16:
                 else
                 {
                     //ESCRIBIR Codigo intermedio?
+                    if(type1 == "string"){
+                        cout<<res.message<<endl;
+                        excalibur_builder->store_value_in_variable(variable_link,"string", yyvsp[-2].text, constant_value);
+                    }else if(type1 == "bool"){
+                        excalibur_builder->store_value_in_variable(variable_link,"bool", yyvsp[-2].text, constant_value);
+                    }
+                   
                     cout<<"expression id:"<<expression_identifier<<endl;
                     string assign_identifier(yyvsp[-2].text);
                     assign_quadruple = assign_identifier+" = "+expression_identifier;
@@ -1316,7 +1328,7 @@ case 16:
     ;
     break;}
 case 17:
-#line 256 "Parser.y"
+#line 268 "Parser.y"
 {
         res = Table.get_type(yyvsp[-1].text);
         if(res.error)
@@ -1329,7 +1341,7 @@ case 17:
     ;
     break;}
 case 19:
-#line 272 "Parser.y"
+#line 284 "Parser.y"
 {
         string id(yyvsp[0].text);
         string new_line("@t1 = "+id+"\nwrite(@t1)");
@@ -1337,7 +1349,7 @@ case 19:
     ;
     break;}
 case 20:
-#line 278 "Parser.y"
+#line 290 "Parser.y"
 {
         res = Table.get_type(yyvsp[0].text);
         if(res.error)
@@ -1350,16 +1362,22 @@ case 20:
     ;
     break;}
 case 21:
-#line 295 "Parser.y"
+#line 307 "Parser.y"
 {
+        string text(yyvsp[0].text);
+        //eliminate the quotes
+        text.erase(0,1);
+        text.erase(text.length()-1,1);
+        cout<<"text:"<<text<<endl;
         semantic_result* res = new semantic_result;
         res->error = false;
         res->attribute = "string";
+        res->message = text;
         yyval.expression_node = res; 
     ;
     break;}
 case 22:
-#line 302 "Parser.y"
+#line 320 "Parser.y"
 {
         semantic_result Node_res;        
         node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
@@ -1369,16 +1387,21 @@ case 22:
     ;
     break;}
 case 23:
-#line 310 "Parser.y"
+#line 328 "Parser.y"
 {
+    string bool_value(yyvsp[0].text);
     semantic_result* res = new semantic_result;
     res->error = false;
     res->attribute = "bool";
+    if(bool_value == "true")
+        res->message = "1";
+    else
+        res->message = "0";
     yyval.expression_node = res;
 ;
     break;}
 case 24:
-#line 323 "Parser.y"
+#line 346 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1398,11 +1421,11 @@ case 24:
     ;
     break;}
 case 25:
-#line 344 "Parser.y"
+#line 367 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
 case 26:
-#line 346 "Parser.y"
+#line 369 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1440,7 +1463,7 @@ case 26:
     ;
     break;}
 case 27:
-#line 382 "Parser.y"
+#line 405 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1479,7 +1502,7 @@ case 27:
     ;
     break;}
 case 28:
-#line 424 "Parser.y"
+#line 447 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1499,11 +1522,11 @@ case 28:
     ;
     break;}
 case 29:
-#line 444 "Parser.y"
+#line 467 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
 case 30:
-#line 446 "Parser.y"
+#line 469 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1542,7 +1565,7 @@ case 30:
     ;
     break;}
 case 31:
-#line 483 "Parser.y"
+#line 506 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1581,7 +1604,7 @@ case 31:
     ;
     break;}
 case 32:
-#line 523 "Parser.y"
+#line 546 "Parser.y"
 {            
         res = Table.get_type(yyvsp[0].text);
         if(!res.error)
@@ -1595,25 +1618,25 @@ case 32:
     ;
     break;}
 case 33:
-#line 535 "Parser.y"
+#line 558 "Parser.y"
 {
         yyval.expression_node = new node(yyvsp[0].text,"int");
     ;
     break;}
 case 34:
-#line 539 "Parser.y"
+#line 562 "Parser.y"
 {
         yyval.expression_node = new node(yyvsp[0].text,"float");
     ;
     break;}
 case 35:
-#line 543 "Parser.y"
+#line 566 "Parser.y"
 {
         yyval.expression_node = yyvsp[-1].expression_node;
     ;
     break;}
 case 36:
-#line 550 "Parser.y"
+#line 573 "Parser.y"
 {
         // semantic_result* casted_ptr = static_cast<semantic_result *> ($1);
         // res = *casted_ptr;
@@ -1627,7 +1650,7 @@ case 36:
     ;
     break;}
 case 37:
-#line 562 "Parser.y"
+#line 585 "Parser.y"
 {
         string bool_value(yyvsp[0].text);
         string new_line("@t1 = " +bool_value);
@@ -1640,7 +1663,7 @@ case 37:
     ;
     break;}
 case 38:
-#line 573 "Parser.y"
+#line 596 "Parser.y"
 {
         semantic_result* res_bool = new semantic_result;
         res = Table.get_type(yyvsp[0].text);
@@ -1661,7 +1684,7 @@ case 38:
     ;
     break;}
 case 39:
-#line 594 "Parser.y"
+#line 617 "Parser.y"
 {
         semantic_result* res_bool = new semantic_result;
         node* casted_ptr = static_cast<node *> (yyvsp[-2].expression_node);
@@ -1900,7 +1923,7 @@ YYLABEL(yyerrhandle)
 /* END */
 
  #line 1038 "/usr/share/bison++/bison.cc"
-#line 650 "Parser.y"
+#line 673 "Parser.y"
 
 
 void semantic_error(semantic_result res)
@@ -1980,14 +2003,17 @@ int main(int argc, char** argv) {
 
     fclose(file);
 
-    end_time = clock();  // Get the final clock time
+    end_time = clock();  // Get the final clock time*
 
     // Calculate the execution time in seconds
     execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
     printf("Finalizado...\n");
-    if(error_count==0)
+    if(error_count==0){
         block_stack.write_file("IR.txt");
+        excalibur_builder->print_llvm_code();
+    }
+
     // if (B == 1)
     //     printf("\n\nParseo no finalizado debido a errores, tiempo de ejecucion: %.20f segundos\n", execution_time);
     // else

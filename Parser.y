@@ -23,7 +23,7 @@ extern int yylineno;
 sym_table Table;
 semantic_result res;
 block_stack block_stack;
-llvm_generator* excalibur = new llvm_generator();
+llvm_generator* excalibur_builder = new llvm_generator();
 int error_count =0;
 %}
 
@@ -178,7 +178,8 @@ function_line_alpha:
 var_init:
     TYPE ID
     {
-        res = Table.insert($2, $1);
+        int sym_link = excalibur_builder->add_static_declaration($1);
+        res = Table.insert($2, $1, sym_link);
         if(res.error)
             semantic_error(res);
         string type($1);
@@ -203,6 +204,8 @@ var_assign:
     {
         string type1 = "";
         string type2 = "";
+        string constant_value = "";
+        int variable_link=0;
         string expression_quadruple="";
         string expression_identifier="";
         string assign_quadruple="";
@@ -216,6 +219,7 @@ var_assign:
         else
         {
             type1 = res.attribute;
+            variable_link = res.sym_link;
             semantic_result* casted_ptr = static_cast<semantic_result *> ($3);
             res = *casted_ptr;
             if(res.error)
@@ -226,6 +230,7 @@ var_assign:
             else
             {
                 type2 = res.attribute;
+                constant_value = res.message;
                 expression_quadruple = res.IR_node_quadruple;
                 expression_identifier = res.IR_node_identifier;
                 res = get_type_relation(type1, type2);
@@ -236,6 +241,13 @@ var_assign:
                 else
                 {
                     //ESCRIBIR Codigo intermedio?
+                    if(type1 == "string"){
+                        cout<<res.message<<endl;
+                        excalibur_builder->store_value_in_variable(variable_link,"string", $1, constant_value);
+                    }else if(type1 == "bool"){
+                        excalibur_builder->store_value_in_variable(variable_link,"bool", $1, constant_value);
+                    }
+                   
                     cout<<"expression id:"<<expression_identifier<<endl;
                     string assign_identifier($1);
                     assign_quadruple = assign_identifier+" = "+expression_identifier;
@@ -293,9 +305,15 @@ write_parameter:
 expression:
     STRING
     {
+        string text($1);
+        //eliminate the quotes
+        text.erase(0,1);
+        text.erase(text.length()-1,1);
+        cout<<"text:"<<text<<endl;
         semantic_result* res = new semantic_result;
         res->error = false;
         res->attribute = "string";
+        res->message = text;
         $$ = res; 
     }
 |   numerical_expression
@@ -308,9 +326,14 @@ expression:
     }
 |   BOOL
 {
+    string bool_value($1);
     semantic_result* res = new semantic_result;
     res->error = false;
     res->attribute = "bool";
+    if(bool_value == "true")
+        res->message = "1";
+    else
+        res->message = "0";
     $$ = res;
 }
 ;
@@ -732,8 +755,11 @@ int main(int argc, char** argv) {
     execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
     printf("Finalizado...\n");
-    if(error_count==0)
+    if(error_count==0){
         block_stack.write_file("IR.txt");
+        excalibur_builder->print_llvm_code();
+    }
+
     // if (B == 1)
     //     printf("\n\nParseo no finalizado debido a errores, tiempo de ejecucion: %.20f segundos\n", execution_time);
     // else

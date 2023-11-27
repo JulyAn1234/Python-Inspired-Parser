@@ -13,6 +13,7 @@ struct semantic_result
     bool error;
     string message;
     string attribute;
+    int sym_link;
     string IR_node_quadruple;
     string IR_node_identifier;
     int IR_temp_variable_counter;
@@ -24,8 +25,15 @@ struct temp_node
     char* op;
 };
 
+struct sym_table_row
+{
+    string type;
+    int sym_link;
+};
+
 typedef struct semantic_result semantic_result;
-typedef unordered_map <string, string> sym_hash_table;
+typedef struct sym_table_row sym_table_row;
+typedef unordered_map <string, sym_table_row> sym_hash_table;
 
 class node
 {
@@ -61,11 +69,13 @@ class sym_table
         //Same Idea as pop from the stack data structure
         semantic_result delete_scope();
         //Insert value in the hash table of the current scope
-        semantic_result insert(string name, string type);
+        semantic_result insert(string name, string type, int sym_link);
         //Search in stack
         sym_hash_table* is_on_table(string name);
         //Search and return the value
         semantic_result get_type(string name);
+        //Search and return the value
+        semantic_result get_sym_link(string name);
 
 };
 

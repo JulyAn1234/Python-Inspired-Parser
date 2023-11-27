@@ -122,10 +122,12 @@ semantic_result sym_table::get_type(string name)
     ptr = is_on_table(name);
     if(ptr != nullptr)
     {
-        id_type = (*ptr)[name];
+        id_type = (*ptr)[name].type;
+        int id_sym_link = (*ptr)[name].sym_link;
         res.error = false;
         res.message = "Retrieved type successfully";
         res.attribute = id_type;
+        res.sym_link = id_sym_link;
         return res;
     }   
     else
@@ -136,7 +138,7 @@ semantic_result sym_table::get_type(string name)
     }
 }
 
-semantic_result sym_table::insert(string name, string type)
+semantic_result sym_table::insert(string name, string type, int sym_link)
 {
     sym_hash_table* ptr = nullptr;
     ptr = current_scope();
@@ -145,7 +147,8 @@ semantic_result sym_table::insert(string name, string type)
         //If the variable is not already declared in this or previous scopes.
         if(is_on_table(name)== nullptr)
         {
-            (*ptr)[name] = type;
+            sym_table_row row = {type, sym_link};
+            (*ptr)[name] = row;
             semantic_result res;
             res.error = false;
             res.message = "ID added successfully";
