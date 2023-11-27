@@ -2,7 +2,10 @@ float aa;
 aa = 2.0;
 int c;
 bool z;
-
+bool k;
+string bb;
+string cc;
+cc = bb;
 
 int a;
 a = 100;

@@ -8,8 +8,7 @@
 #include <string>
 #include <unistd.h>
 #include "block_stack.h"
-//#include <>
-
+#include "llvm_generator.h"
 //Prototipos y externos, se rompe todo si no estan...
 int yylex();
 extern FILE* yyin;
@@ -24,6 +23,7 @@ extern int yylineno;
 sym_table Table;
 semantic_result res;
 block_stack block_stack;
+llvm_generator* excalibur = new llvm_generator();
 int error_count =0;
 %}
 

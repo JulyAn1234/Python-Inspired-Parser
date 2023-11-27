@@ -5,6 +5,7 @@
 #include <queue>
 #include <vector>
 #include <variant>
+#include <unordered_set>
 
 using namespace std;
 
@@ -28,13 +29,13 @@ class llvm_block{
         int block_to_jump_to_sym_link;
         string block_type = "";
         queue <llvm_line> line_queue;
-
     public:
         llvm_block();
         llvm_block(int sym_link_param);
         ~llvm_block();
-        void print_block(int sym_link_offset);
+        void print_block(int sym_link_offset, queue < llvm_line > static_declarations_queue);
         void add_line_to_queue(llvm_line line);
+        void print_line(llvm_line line);
         void print_line(llvm_line line, int sym_link_offset);
         int get_block_sym_link();
         void set_following_block_sym_link(int sym_link);
@@ -47,10 +48,17 @@ class llvm_block{
 class llvm_generator
 {
     private:
-        int sym_link_offset = 2;
+        //function constants
+        const string memcpy = "declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i64, i1 immarg)";
+        
+        int sym_link_offset = 0;
         int sym_link_count;
         llvm_block* current_block;
+
         queue < llvm_block* > block_queue;
+        queue < llvm_line > static_declarations_queue;
+        queue < llvm_line > global_declarations_queue;
+        unordered_set < string > function_declarations_set;
         stack < llvm_block* > block_stack;
 
     public:
@@ -59,7 +67,13 @@ class llvm_generator
 
         void create_new_block();
 
+        void print_llvm_code();
+
         void print_block_queue();
+
+        void print_global_declarations_queue();
+
+        void print_function_declarations_set();
 
         //Function for handling of if/loop blocks
         void if_starts();
@@ -67,7 +81,26 @@ class llvm_generator
         void while_starts();
         void while_ends();
 
+        //Functions for handling lines addition to the current block
+
         void add_line_to_current_block(llvm_line line);
+
+        //Pushes declaration into the static declarations queue and adds 1 to the sym_link_offset
+            //returns the symbolic link to the variable
+        int add_static_declaration(string type);
+
+        //Functions for storing values
+        //overload for constant values
+        void store_value_in_variable(int sym_link_to_variable, string variable_type, string variable_name,string value);
+        //overload for symbolic links to values
+        void store_value_in_variable(int sym_link_to_variable, string variable_type, int sym_link_to_value);
+
+
+        //Function for adding a global declaration
+        void add_global_declaration(llvm_line global_declaration);
+
+        //Function for adding a function declaration
+        void add_function_declaration(llvm_line function_declaration);
 
         // //Functions for allocating variables, return the symbolic link to the variable
         // int allocaInt();

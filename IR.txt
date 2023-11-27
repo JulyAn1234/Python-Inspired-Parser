@@ -3,6 +3,11 @@ L0: float aa
 aa = @t1
 int c
 bool z
+bool k
+string bb
+string cc
+@t1 = bb
+cc = @t1
 int a
 @t1 = 100
 a = @t1
