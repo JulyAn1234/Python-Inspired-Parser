@@ -50,7 +50,8 @@ class llvm_generator
     private:
         //function constants
         const string memcpy = "declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i64, i1 immarg)";
-        
+        const string strcpy = "declare i8* @strcpy(i8* noundef, i8* noundef)";
+
         int sym_link_offset = 0;
         int sym_link_count;
         llvm_block* current_block;
@@ -90,17 +91,33 @@ class llvm_generator
         int add_static_declaration(string type);
 
         //Functions for storing values
-        //overload for constant values
+        //for constant values
         void store_value_in_variable(int sym_link_to_variable, string variable_type, string variable_name,string value);
-        //overload for symbolic links to values
-        void store_value_in_variable(int sym_link_to_variable, string variable_type, int sym_link_to_value);
+        //for symbolic links to values
+        void store_link_in_variable(int sym_link_to_variable, string variable_type, int sym_link_to_value);
 
+        //for storing the value of a string variable in another string variable
+        void store_link_to_string_variable(int sym_link_to_variable_to_change, int sym_link_to_string_to_be_stored);
+
+        //Functions for loading values 
+            //returns the symbolic link to the result 
+        int load_value_from_variable(int sym_link_to_variable, string variable_type);
 
         //Function for adding a global declaration
         void add_global_declaration(llvm_line global_declaration);
 
         //Function for adding a function declaration
         void add_function_declaration(llvm_line function_declaration);
+
+        //Functions for converting values
+        int int_to_double(int sym_link_to_variable);
+        int double_to_int(int sym_link_to_variable);
+
+        //Functions for performing binary operations
+        int link_to_link_operation(int sym_link1, int sym_link2, string op, string type);
+        int link_to_constant_operation(int sym_link,string constant, string op, string type);
+        int constant_to_link_operation(string constant, int sym_link, string op, string type);                
+        int constant_to_constant_operation(string constant1, string constant2, string op, string type);
 
         // //Functions for allocating variables, return the symbolic link to the variable
         // int allocaInt();

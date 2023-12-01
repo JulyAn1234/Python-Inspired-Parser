@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <stack>
+#include "llvm_generator.h"
 
 using namespace std;
 
@@ -14,6 +15,8 @@ struct semantic_result
     string message;
     string attribute;
     int sym_link;
+    bool is_constant;
+    char* data;
     string IR_node_quadruple;
     string IR_node_identifier;
     int IR_temp_variable_counter;
@@ -40,8 +43,12 @@ class node
     public:
         char* data;
         char* type;
+        bool is_constant;
+        int sym_link;
         node* left_node = nullptr;
         node* right_node = nullptr;
+        node(char* data, char* type, bool is_constant);
+        node(char* data, char* type, int sym_link);
         node(char* data, char* type);
         node(char* data);
         void assign_left_node(node* node_ptr);
@@ -50,7 +57,7 @@ class node
         node* get_right_node();
         void insert_left_most(node* node_ptr);
         string post_order_traversal();
-        semantic_result define_type(int temp_variable_counter);
+        semantic_result define_type(int temp_variable_counter,  llvm_generator* excalibur_generator_ptr);
         semantic_result type_system(char* type1, char* type2, char* op);
         char* to_char_ptr (const string& str);
 };
@@ -76,7 +83,6 @@ class sym_table
         semantic_result get_type(string name);
         //Search and return the value
         semantic_result get_sym_link(string name);
-
 };
 
 #endif 

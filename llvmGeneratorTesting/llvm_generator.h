@@ -95,6 +95,9 @@ class llvm_generator
         //overload for symbolic links to values
         void store_value_in_variable(int sym_link_to_variable, string variable_type, int sym_link_to_value);
 
+        //Functions for loading values 
+            //returns the symbolic link to the result 
+        int load_value_from_variable(int sym_link_to_variable, string variable_type);
 
         //Function for adding a global declaration
         void add_global_declaration(llvm_line global_declaration);

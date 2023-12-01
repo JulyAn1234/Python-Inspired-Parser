@@ -133,6 +133,31 @@ void llvm_generator::store_value_in_variable(int sym_link_to_variable, string va
 
 }
 
+int llvm_generator::load_value_from_variable(int sym_link_to_variable, string variable_type){
+    int sym_link_to_result = sym_link_count;
+    if(variable_type=="int"){ 
+        add_line_to_current_block({"%",sym_link_to_result," = load i32, i32* %"+to_string(sym_link_to_variable)+", align 4"});
+    }else if(variable_type=="float"){
+        add_line_to_current_block({"%",sym_link_to_result," = load double, double* %"+to_string(sym_link_to_variable)+", align 8"});
+    }else if(variable_type=="string"){
+        //   %16 = getelementptr inbounds [100 x i8], [100 x i8]* %9, i64 0, i64 0
+        add_line_to_current_block({"%",sym_link_to_result," = getelementptr inbounds [100 x i8], [100 x i8]* %"+to_string(sym_link_to_variable)+", i64 0, i64 0"});
+    }else if(variable_type=="bool"){
+        //%11 = load i8, i8* %2, align 1
+        //%12 = trunc i8 %11 to i1
+        //%13 = zext i1 %12 to i8
+        add_line_to_current_block({"%",sym_link_to_result," = load i8, i8* %"+to_string(sym_link_to_variable)+", align 1"});
+        sym_link_count++;
+        sym_link_to_result = sym_link_count;
+        add_line_to_current_block({"%",sym_link_to_result," = trunc i8 %",(sym_link_to_result-1)," to i1"});
+        sym_link_count++;
+        sym_link_to_result = sym_link_count;
+        add_line_to_current_block({"%",sym_link_to_result," = zext i1 %",(sym_link_to_result-1)," to i8"});
+    }
+    sym_link_count++;
+    return sym_link_to_result;
+}
+
 void llvm_generator::print_llvm_code(){
     print_global_declarations_queue();
     cout<<"define dso_local noundef i32 @main() #0 {"<<"\n";

@@ -1,72 +1,11 @@
 L0: float aa
-@t1 = 2.0
-aa = @t1
 int c
 bool z
 bool k
-
-k = 
 string bb
 string cc
-
-cc = 
 int a
-@t1 = 100
-a = @t1
 int b
 int d
 int e
-@t1 = a
-@t2 = 2
-@t1 = @t1>@t2
-if @t1 goto L1
-goto L2
-L1:@t1 = a
-@t2 = b
-@t3 = c
-@t2 = @t2 * @t3
-@t1 = @t1 + @t2
-@t2 = d
-@t3 = e
-@t2 = @t2 - @t3
-@t3 = 12321.2
-@t4 = 123
-@t3 = @t3 / @t4
-@t4 = 123
-@t5 = 12
-@t6 = 123
-@t5 = @t5 * @t6
-@t6 = 12
-@t5 = @t5 / @t6
-@t6 = 1
-@t7 = 2
-@t6 = @t6 + @t7
-@t5 = @t5 * @t6
-@t4 = @t4 + @t5
-@t3 = @t3 * @t4
-@t4 = 3
-@t5 = 2
-@t6 = 2
-@t5 = @t5 * @t6
-@t4 = @t4 + @t5
-@t3 = @t3 - @t4
-@t2 = @t2 + @t3
-@t1 = @t1 / @t2
-@t2 = 2
-@t3 = 121
-@t2 = @t2 * @t3
-@t3 = 523
-@t4 = 12
-@t3 = @t3 + @t4
-@t2 = @t2 / @t3
-@t1 = @t1 / @t2
-e = @t1
-
-L2:
-L3: @t1 = z
-if @t1 goto L4
-goto L5
-L4:
-goto L3
-L5:
 

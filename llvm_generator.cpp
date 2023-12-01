@@ -129,8 +129,260 @@ void llvm_generator::store_value_in_variable(int sym_link_to_variable, string va
     }
 }
 
-void llvm_generator::store_value_in_variable(int sym_link_to_variable, string variable_type, int sym_link_to_value){
+void llvm_generator::store_link_in_variable(int sym_link_to_variable, string variable_type, int sym_link_to_value){
+    if(variable_type=="int"){
+        //store i32 0, i32* %3, align 4
+        add_line_to_current_block({"store i32 %",sym_link_to_value,", i32* %"+to_string(sym_link_to_variable)+", align 4"});
+    }else if(variable_type == "float"){
+        //store double 0.000000e+00, double* %4, align 8
+        add_line_to_current_block({"store double %",sym_link_to_value,", double* %"+to_string(sym_link_to_variable)+", align 8"});
+    }else if(variable_type == "bool"){
+        //store i8 %18, i8* %6, align 1
+        add_line_to_current_block({"store i8 %",sym_link_to_value,", i8* %"+to_string(sym_link_to_variable)+", align 1"});
+    }
+    //string logic for storing links is implemented in another function called store_link_to_string_variable
+}
 
+void llvm_generator::store_link_to_string_variable(int sym_link_to_variable_to_change, int sym_link_to_string_to_be_stored){
+    //Asume that the string to be stored is already in the correct format
+    //Asume parameter sym_link_to_string_to_be_stored is the sym_link to the loaded value of the variable
+    //load the value of the variable to change
+    sym_link_to_variable_to_change = load_value_from_variable(sym_link_to_variable_to_change,"string");
+    //add strcpy function to function declarations set
+    function_declarations_set.insert(strcpy);
+    //call strcpy function
+    //  %60 = call i8* @strcpy(i8* noundef %58, i8* noundef %59) first parameter is the destination, second parameter is the source
+    add_line_to_current_block({"%",sym_link_count," = call i8* @strcpy(i8* noundef %",sym_link_to_variable_to_change,", i8* noundef %",sym_link_to_string_to_be_stored,")"});
+    sym_link_count++; 
+}
+
+int llvm_generator::load_value_from_variable(int sym_link_to_variable, string variable_type){
+    int sym_link_to_result = sym_link_count;
+    if(variable_type=="int"){ 
+        add_line_to_current_block({"%",sym_link_to_result," = load i32, i32* %"+to_string(sym_link_to_variable)+", align 4"});
+    }else if(variable_type=="float"){
+        add_line_to_current_block({"%",sym_link_to_result," = load double, double* %"+to_string(sym_link_to_variable)+", align 8"});
+    }else if(variable_type=="string"){
+        //   %16 = getelementptr inbounds [100 x i8], [100 x i8]* %9, i64 0, i64 0
+        add_line_to_current_block({"%",sym_link_to_result," = getelementptr inbounds [100 x i8], [100 x i8]* %"+to_string(sym_link_to_variable)+", i64 0, i64 0"});
+    }else if(variable_type=="bool"){
+        //%11 = load i8, i8* %2, align 1
+        //%12 = trunc i8 %11 to i1
+        //%13 = zext i1 %12 to i8
+        add_line_to_current_block({"%",sym_link_to_result," = load i8, i8* %"+to_string(sym_link_to_variable)+", align 1"});
+        sym_link_count++;
+        sym_link_to_result = sym_link_count;
+        add_line_to_current_block({"%",sym_link_to_result," = trunc i8 %",(sym_link_to_result-1)," to i1"});
+        sym_link_count++;
+        sym_link_to_result = sym_link_count;
+        add_line_to_current_block({"%",sym_link_to_result," = zext i1 %",(sym_link_to_result-1)," to i8"});
+    }
+    sym_link_count++;
+    return sym_link_to_result;
+}
+
+int llvm_generator::int_to_double(int sym_link_to_variable){
+    int sym_link_to_result = sym_link_count;
+    //  %16 = sitofp i32 %15 to double
+    add_line_to_current_block({"%",sym_link_to_result," = sitofp i32 %",sym_link_to_variable," to double"});    
+    sym_link_count++;
+    return sym_link_to_result;
+}
+
+int llvm_generator::double_to_int(int sym_link_to_variable){
+    int sym_link_to_result = sym_link_count;
+    //%15 = fptosi double %14 to i32
+    add_line_to_current_block({"%",sym_link_to_result," = fptosi double %",sym_link_to_variable," to i32"});    
+    sym_link_count++;
+    return sym_link_to_result;
+}
+
+int llvm_generator::link_to_link_operation(int sym_link1, int sym_link2, string op, string type){
+    int sym_link_to_result = sym_link_count;
+    if(op == "+"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "add nsw i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fadd double %", sym_link1, ", %", sym_link2
+            });
+    }else if(op == "-"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "sub nsw i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fsub double %", sym_link1, ", %", sym_link2
+            });        
+    }else if(op == "*"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "mul nsw i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fmul double %", sym_link1, ", %", sym_link2
+            });        
+    }else if(op == "/"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "sdiv i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fdiv double %", sym_link1, ", %", sym_link2
+            });
+    }
+    sym_link_count++;
+    return sym_link_to_result;
+}
+int llvm_generator::link_to_constant_operation(int sym_link,string constant, string op, string type){
+    int sym_link_to_result = sym_link_count;
+
+    if(op == "+"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "add nsw i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fadd double %", sym_link, ", %", constant
+            });
+    }else if(op == "-"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "sub nsw i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fsub double %", sym_link, ", ", constant
+            });        
+    }else if(op == "*"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "mul nsw i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fmul double %", sym_link, ", ", constant
+            });        
+    }else if(op == "/"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "sdiv i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fdiv double %", sym_link, ", ", constant
+            });
+    }
+    sym_link_count++;
+    return sym_link_to_result;
+}
+int llvm_generator::constant_to_link_operation(string constant, int sym_link, string op, string type){
+    int sym_link_to_result = sym_link_count;
+
+    if(op == "+"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "add nsw i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fadd double ", constant, ", %", sym_link
+            });
+    }else if(op == "-"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "sub nsw i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fsub double ", constant, ", %", sym_link
+            });        
+    }else if(op == "*"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "mul nsw i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fmul double ", constant, ", %", sym_link
+            });        
+    }else if(op == "/"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "sdiv i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fdiv double ", constant, ", %", sym_link
+            });
+    }
+    sym_link_count++;
+    return sym_link_to_result;
+}
+int llvm_generator::constant_to_constant_operation(string constant1, string constant2, string op, string type){
+    int sym_link_to_result = sym_link_count;
+
+    if(op == "+"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "add nsw i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fadd double ", constant1, ", ", constant2
+            });
+    }else if(op == "-"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "sub nsw i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fsub double ", constant1, ", ", constant2
+            });        
+    }else if(op == "*"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "mul nsw i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fmul double ", constant1, ", ", constant2
+            });        
+    }else if(op == "/"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "sdiv i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fdiv double ", constant1, ", ", constant2
+            });
+    }
+    sym_link_count++;
+    return sym_link_to_result;
 }
 
 void llvm_generator::print_llvm_code(){

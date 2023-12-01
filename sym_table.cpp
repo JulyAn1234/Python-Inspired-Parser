@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <stack>
 #include <string.h>
+#include "llvm_generator.h"
 
 using namespace std;
 
@@ -171,10 +172,31 @@ semantic_result sym_table::insert(string name, string type, int sym_link)
     }       
 }
 
+node::node(char* data_parameter, char* type_parameter, bool is_constant_parameter)
+{
+    data = data_parameter;
+    type = type_parameter;
+    sym_link=-1;
+    is_constant = is_constant_parameter;
+    right_node = nullptr;
+    left_node = nullptr;
+}
+
+node::node(char* data_parameter, char* type_parameter, int sym_link_parameter){
+    data = data_parameter;
+    type = type_parameter;
+    is_constant = false;
+    sym_link= sym_link_parameter;
+    right_node = nullptr;
+    left_node = nullptr;
+}
+
 node::node(char* data_parameter, char* type_parameter)
 {
     data = data_parameter;
     type = type_parameter;
+    is_constant = false;
+    sym_link=-1;
     right_node = nullptr;
     left_node = nullptr;
 }
@@ -182,7 +204,9 @@ node::node(char* data_parameter, char* type_parameter)
 node::node(char* data_parameter)
 {
     data = data_parameter;
+    is_constant = false;
     type = nullptr;
+    sym_link=-1;
     right_node = nullptr;
     left_node = nullptr;
 }   
@@ -238,22 +262,24 @@ string node::post_order_traversal()
     return traversal;
 }
 
-semantic_result node::define_type(int temp_variable_counter)
+semantic_result node::define_type(int temp_variable_counter, llvm_generator* excalibur_generator_ptr)
 {
     semantic_result res;
     char* type1 = nullptr;
     char* type2 = nullptr;
+    char* data1 = nullptr;
+    char* data2 = nullptr;
+    int sym_link1 = -1;
+    int sym_link2 = -1;
+
     char* op = nullptr;
-    string quadruple_1;
-    string quadruple_2;
-    string identifier_1;
-    string identifier_2;
+
     //Recorriendo el camino izquierdo...
 
     //Caso hijo izq no es nullptr, recorrerlo
     if(left_node != nullptr)
     {
-        res = left_node -> define_type(temp_variable_counter);
+        res = left_node -> define_type(temp_variable_counter, excalibur_generator_ptr);
         if(res.error)
         {
             return res;
@@ -261,9 +287,12 @@ semantic_result node::define_type(int temp_variable_counter)
         else
         {
             type1 = to_char_ptr(res.attribute);
-            quadruple_1 = res.IR_node_quadruple;
-            identifier_1 = res.IR_node_identifier;
-            temp_variable_counter = res.IR_temp_variable_counter;
+
+            if(res.is_constant){
+                data1= res.data;
+            }else{
+                sym_link1 = res.sym_link;
+            }
         }
     }        
     //Caso hijo izq nullptr
@@ -272,18 +301,27 @@ semantic_result node::define_type(int temp_variable_counter)
         //leaf node...
         if(type != nullptr)
         {
-            //creando variable temporal
-            temp_variable_counter++;
-            string node_identifier = "@t"+to_string(temp_variable_counter);
-            string node_quadruple = node_identifier+" = "+string(data);
             res.error = false;
             res.attribute = type;
             res.message = "Type retrieved succesfully.";
+            res.is_constant = is_constant;
+            if(is_constant){//pass directly
+                res.data = data;
+            }else{//do load
+                if(strcmp(type, "int")==0){
+                    res.sym_link = excalibur_generator_ptr->load_value_from_variable(sym_link, type);
+                }
+                if(strcmp(type, "float")==0){
+                    res.sym_link = excalibur_generator_ptr->load_value_from_variable(sym_link, type);
+                }
+                if(strcmp(type, "string")==0){
+                    res.sym_link = excalibur_generator_ptr->load_value_from_variable(sym_link, type);
+                }else{
+                    res.sym_link = excalibur_generator_ptr->load_value_from_variable(sym_link, type);
+                }                          
+            }
+            
             //sending left node data
-            res.IR_node_identifier = node_identifier;
-
-            res.IR_node_quadruple = node_quadruple;
-            res.IR_temp_variable_counter = temp_variable_counter;
             return res;    
         }
         //Nodo operador sin hijo izq, hubo un error de sintaxis. En teoria esto no deberia pasar...
@@ -318,7 +356,7 @@ semantic_result node::define_type(int temp_variable_counter)
     //Recorrido derecho
     if(right_node != nullptr)
     {
-        res = right_node -> define_type(temp_variable_counter);
+        res = right_node -> define_type(temp_variable_counter, excalibur_generator_ptr);
         if(res.error)
         {
             return res;
@@ -326,9 +364,11 @@ semantic_result node::define_type(int temp_variable_counter)
         else
         {
             type2 = to_char_ptr(res.attribute);
-            quadruple_2 = res.IR_node_quadruple;
-            identifier_2 = res.IR_node_identifier;
-            temp_variable_counter = res.IR_temp_variable_counter;
+            if(res.is_constant){
+                data2 = res.data;
+            }else{
+                sym_link2 = res.sym_link;
+            }
         }
     }        
     //Caso hijo der nullptr
@@ -336,19 +376,10 @@ semantic_result node::define_type(int temp_variable_counter)
     {
         //leaf node...
         if(type != nullptr)
-        {
-            //creando variable temporal
-            temp_variable_counter++;
-            string node_identifier = "@t"+to_string(temp_variable_counter);
-            string node_quadruple = node_identifier+" = "+string(data);
-            
+        {            
             res.error = false;
             res.attribute = type;
             res.message = "Type retrieved succesfully.";
-            //sending right node data
-            res.IR_node_identifier = node_identifier;
-            res.IR_node_quadruple = node_quadruple;
-            res.IR_temp_variable_counter = temp_variable_counter;
             return res;    
         }
         //Nodo operador sin hijo izq, hubo un error de sintaxis. En teoria esto no deberia pasar...
@@ -375,19 +406,53 @@ semantic_result node::define_type(int temp_variable_counter)
         res.error = false;
         res.message = "Type retrieved succesfully.";
         res.attribute = res.attribute;
-        //creando variable temporal
-        //Intentemos reducir el numero de variables temporales creadas restando uno al contador, pero después de probarlo...
-        temp_variable_counter--;
-        string node_identifier = "@t"+to_string(temp_variable_counter);
-        string node_quadruple = node_identifier+" = "+identifier_1+" "+string(op)+" "+identifier_2;
-        
-        //joining quadruples
-        node_quadruple = quadruple_1 + "\n" + quadruple_2 + "\n" + node_quadruple;
-        
-        //sending node data
-        res.IR_node_identifier = node_identifier;
-        res.IR_node_quadruple = node_quadruple;
-        res.IR_temp_variable_counter = temp_variable_counter;
+
+        if(res.attribute == "float"){
+            excalibur_generator_ptr->add_line_to_current_block({";Expresion flotante abajo", type1, type2, "hay espacios???"});
+            if(strcmp(type1, "int") == 0){
+                excalibur_generator_ptr->add_line_to_current_block({"; Llegue a type1 == int"});
+                if(data1 != nullptr){//left node is constant
+                    strcat(data1, ".0");
+                    excalibur_generator_ptr->add_line_to_current_block({"; Convertí a double una constante"});
+                }else{
+                    //Call llvm_generator function that makes an int to float conversion
+                    sym_link1 = excalibur_generator_ptr->int_to_double(sym_link1);
+                }
+                type1 = "float";
+            }else if(strcmp(type2, "int") == 0){
+                excalibur_generator_ptr->add_line_to_current_block({"; Llegue a type2 == int"});
+                if(data2 != nullptr){//right node is constant
+                    strcat(data2, ".0");
+                    excalibur_generator_ptr->add_line_to_current_block({"; Convertí a double una constante"});
+                }else{
+                    sym_link2 = excalibur_generator_ptr->int_to_double(sym_link2);
+                }
+                type2 = "float";
+            }
+        }
+
+        int sym_link_to_result;
+        //Call function(value, value, op, type) 4 variants in llvm_generator
+        if(data1 != nullptr){
+            if(data2 != nullptr){
+                //constant to constant data1 data2
+                excalibur_generator_ptr->add_line_to_current_block({";consant to constant"});
+                sym_link_to_result = excalibur_generator_ptr->constant_to_constant_operation(data1, data2, op, type1);
+            }else{
+                //constant to variable data1 sym_link2
+                sym_link_to_result = excalibur_generator_ptr->constant_to_link_operation(data1, sym_link2, op, type1);
+            }
+        }else if(data2 != nullptr){
+            //variable to constant sym_link1 data2
+            sym_link_to_result = excalibur_generator_ptr->link_to_constant_operation(sym_link1, data2, op, type2);
+        }else{
+            //variable to variable sym_link1 sym_link2
+            sym_link_to_result = excalibur_generator_ptr->link_to_link_operation(sym_link1, sym_link2, op, type1);
+        }
+
+        res.sym_link = sym_link_to_result;
+        res.is_constant = false;
+
         return res;
     }
 }
@@ -395,25 +460,13 @@ semantic_result node::define_type(int temp_variable_counter)
 semantic_result node::type_system(char* type1, char* type2, char* op)
 {
     semantic_result res;
-    if (strcmp(type1, "int") == 0 && strcmp(type2, "int") == 0)
-    {
-        if(strcmp(op, "+") == 0 || strcmp(op, "-") == 0|| strcmp(op, "*") == 0)
-        {
-            res.error = false;
-            res.message = "";
-            res.attribute = "int";
-            return res;
-        }   
-        else if(strcmp(op, "/") == 0)
-        {
-            res.error = false;
-            res.message = "";
-            res.attribute = "float";
-            return res;
-        }
+    if (strcmp(type1, "int") == 0 && strcmp(type2, "int") == 0){
+        res.error = false;
+        res.message = "";
+        res.attribute = "int";
+        return res;
     }
-    else if(strcmp(type1, "float") == 0 || strcmp(type2, "float") == 0)
-    {
+    else if(strcmp(type1, "float") == 0 || strcmp(type2, "float") == 0){
         res.error = false;
         res.message= "";
         res.attribute = "float";

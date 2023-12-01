@@ -599,9 +599,9 @@ static const short yyrhs[] = {    -1,
 #if (YY_parse_DEBUG != 0) || defined(YY_parse_ERROR_VERBOSE) 
 static const short yyrline[] = { 0,
     72,    74,    77,    83,    95,   110,   132,   138,   159,   166,
-   170,   172,   173,   174,   178,   202,   265,   279,   282,   289,
-   305,   319,   327,   344,   366,   368,   404,   445,   466,   468,
-   505,   544,   557,   561,   565,   571,   584,   595,   615
+   170,   172,   173,   174,   178,   202,   290,   304,   307,   314,
+   330,   346,   354,   373,   395,   397,   433,   474,   495,   497,
+   534,   573,   586,   590,   594,   600,   613,   624,   644
 };
 
 static const char * const yytname[] = {   "$","error","$illegal.","READ","WRITE",
@@ -1270,11 +1270,10 @@ case 16:
 {
         string type1 = "";
         string type2 = "";
-        string constant_value = "";
         int variable_link=0;
-        string expression_quadruple="";
-        string expression_identifier="";
-        string assign_quadruple="";
+        string tree_result_data;
+        int tree_result_link;
+        bool tree_result_is_constant;
 
         res = Table.get_type(yyvsp[-2].text);
         if(res.error)
@@ -1296,39 +1295,65 @@ case 16:
             else
             {
                 type2 = res.attribute;
-                constant_value = res.message;
-                expression_quadruple = res.IR_node_quadruple;
-                expression_identifier = res.IR_node_identifier;
+                tree_result_is_constant = res.is_constant;
+                if(tree_result_is_constant)
+                    tree_result_data = res.data;
+                else
+                    tree_result_link = res.sym_link;
+                
                 res = get_type_relation(type1, type2);
                 if(res.error)
                 {
                     semantic_error(res);
                 }
-                else
+                else//Write IR code
                 {
-                    //ESCRIBIR Codigo intermedio?
-                    if(type1 == "string"){
-                        cout<<res.message<<endl;
-                        excalibur_builder->store_value_in_variable(variable_link,"string", yyvsp[-2].text, constant_value);
-                    }else if(type1 == "bool"){
-                        excalibur_builder->store_value_in_variable(variable_link,"bool", yyvsp[-2].text, constant_value);
+                    //Type conversions
+                    if(type1 == "float"){
+                        if(type2 == "int"){
+                            if(tree_result_is_constant){
+                                tree_result_data = strcat(to_char_ptr(tree_result_data), ".0");
+                            }else{
+                                tree_result_link = excalibur_builder->int_to_double(tree_result_link);
+                            }
+                            type2 = "float";
+                        }
+                        //bools and strings do not get here
+                        if(tree_result_is_constant){
+                            excalibur_builder->store_value_in_variable(variable_link,"float", yyvsp[-2].text, tree_result_data);
+                        }else{
+                            excalibur_builder->store_link_in_variable(variable_link,"float", tree_result_link);
+                        }
+                    }else if(type1 == "int"){
+                        if(type2 == "float"){
+                            if(tree_result_is_constant){
+                                double casted_tree_data = stod(tree_result_data);
+                                int casted_tree_data_int = static_cast<int> (casted_tree_data);
+                                tree_result_data = to_string(casted_tree_data_int);
+                            }else{
+                                tree_result_link = excalibur_builder->double_to_int(tree_result_link);
+                            }
+                        type2 = "int";
+                        }
                     }
-                   
-                    cout<<"expression id:"<<expression_identifier<<endl;
-                    string assign_identifier(yyvsp[-2].text);
-                    assign_quadruple = assign_identifier+" = "+expression_identifier;
-                    assign_quadruple = expression_quadruple +"\n" + assign_quadruple;
-                    block_stack.add_line(assign_quadruple);
 
-                    // string new_line("t1 = 1+2\na = t1");
-                    // block_stack.add_line(new_line);
+                    //storing values
+                    if(tree_result_is_constant){
+                        excalibur_builder->store_value_in_variable(variable_link,type1, yyvsp[-2].text, tree_result_data);
+                    }else{
+                        if(type1 == "string"){
+                            excalibur_builder->store_link_to_string_variable(variable_link, tree_result_link);
+                        }else{
+                            excalibur_builder->store_link_in_variable(variable_link, type1, tree_result_link);
+                        }
+                    }
                 }
             }
         }
     ;
     break;}
 case 17:
-#line 268 "Parser.y"
+#line 293 "Parser.y"
 {
         res = Table.get_type(yyvsp[-1].text);
         if(res.error)
@@ -1341,7 +1366,7 @@ case 17:
     ;
     break;}
 case 19:
-#line 284 "Parser.y"
+#line 309 "Parser.y"
 {
         string id(yyvsp[0].text);
         string new_line("@t1 = "+id+"\nwrite(@t1)");
@@ -1349,7 +1374,7 @@ case 19:
     ;
     break;}
 case 20:
-#line 290 "Parser.y"
+#line 315 "Parser.y"
 {
         res = Table.get_type(yyvsp[0].text);
         if(res.error)
@@ -1362,7 +1387,7 @@ case 20:
     ;
     break;}
 case 21:
-#line 307 "Parser.y"
+#line 332 "Parser.y"
 {
         string text(yyvsp[0].text);
         //eliminate the quotes
@@ -1372,36 +1397,40 @@ case 21:
         semantic_result* res = new semantic_result;
         res->error = false;
         res->attribute = "string";
-        res->message = text;
+        res->data = to_char_ptr(text);
+        res->is_constant = true;
+        res->sym_link = -1;
         yyval.expression_node = res; 
     ;
     break;}
 case 22:
-#line 320 "Parser.y"
+#line 347 "Parser.y"
 {
         semantic_result Node_res;        
         node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
-        Node_res = casted_ptr -> define_type(0); 
+        Node_res = casted_ptr -> define_type(0, excalibur_builder); 
         semantic_result* res = new semantic_result(Node_res);
         yyval.expression_node = res;
     ;
     break;}
 case 23:
-#line 328 "Parser.y"
+#line 355 "Parser.y"
 {
     string bool_value(yyvsp[0].text);
     semantic_result* res = new semantic_result;
     res->error = false;
     res->attribute = "bool";
     if(bool_value == "true")
-        res->message = "1";
+        res->data = "1";
     else
-        res->message = "0";
+        res->data = "0";
+    res->is_constant = true;
+    res->sym_link = -1;
     yyval.expression_node = res;
 ;
     break;}
 case 24:
-#line 346 "Parser.y"
+#line 375 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1421,11 +1450,11 @@ case 24:
     ;
     break;}
 case 25:
-#line 367 "Parser.y"
+#line 396 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
 case 26:
-#line 369 "Parser.y"
+#line 398 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1463,7 +1492,7 @@ case 26:
     ;
     break;}
 case 27:
-#line 405 "Parser.y"
+#line 434 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1502,7 +1531,7 @@ case 27:
     ;
     break;}
 case 28:
-#line 447 "Parser.y"
+#line 476 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1522,11 +1551,11 @@ case 28:
     ;
     break;}
 case 29:
-#line 467 "Parser.y"
+#line 496 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
 case 30:
-#line 469 "Parser.y"
+#line 498 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1565,7 +1594,7 @@ case 30:
     ;
     break;}
 case 31:
-#line 506 "Parser.y"
+#line 535 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1604,12 +1633,12 @@ case 31:
     ;
     break;}
 case 32:
-#line 546 "Parser.y"
+#line 575 "Parser.y"
 {            
         res = Table.get_type(yyvsp[0].text);
         if(!res.error)
         {
-            yyval.expression_node = new node(yyvsp[0].text,to_char_ptr(res.attribute));
+            yyval.expression_node = new node(yyvsp[0].text,to_char_ptr(res.attribute), res.sym_link);
         }
         else
         {
@@ -1618,25 +1647,25 @@ case 32:
     ;
     break;}
 case 33:
-#line 558 "Parser.y"
+#line 587 "Parser.y"
 {
-        yyval.expression_node = new node(yyvsp[0].text,"int");
+        yyval.expression_node = new node(yyvsp[0].text,"int", true);
     ;
     break;}
 case 34:
-#line 562 "Parser.y"
+#line 591 "Parser.y"
 {
-        yyval.expression_node = new node(yyvsp[0].text,"float");
+        yyval.expression_node = new node(yyvsp[0].text,"float", true);
     ;
     break;}
 case 35:
-#line 566 "Parser.y"
+#line 595 "Parser.y"
 {
         yyval.expression_node = yyvsp[-1].expression_node;
     ;
     break;}
 case 36:
-#line 573 "Parser.y"
+#line 602 "Parser.y"
 {
         // semantic_result* casted_ptr = static_cast<semantic_result *> ($1);
         // res = *casted_ptr;
@@ -1650,7 +1679,7 @@ case 36:
     ;
     break;}
 case 37:
-#line 585 "Parser.y"
+#line 614 "Parser.y"
 {
         string bool_value(yyvsp[0].text);
         string new_line("@t1 = " +bool_value);
@@ -1663,7 +1692,7 @@ case 37:
     ;
     break;}
 case 38:
-#line 596 "Parser.y"
+#line 625 "Parser.y"
 {
         semantic_result* res_bool = new semantic_result;
         res = Table.get_type(yyvsp[0].text);
@@ -1684,12 +1713,12 @@ case 38:
     ;
     break;}
 case 39:
-#line 617 "Parser.y"
+#line 646 "Parser.y"
 {
         semantic_result* res_bool = new semantic_result;
         node* casted_ptr = static_cast<node *> (yyvsp[-2].expression_node);
         node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
-        res = casted_ptr -> define_type(0);
+        res = casted_ptr -> define_type(0, excalibur_builder);
         if(res.error){
             semantic_error(res);
             res_bool->error = true;
@@ -1699,7 +1728,7 @@ case 39:
         {
             string quadruple1 = res.IR_node_quadruple;
             string identifier1 = res.IR_node_identifier;
-            res = casted_ptr2 -> define_type(1);
+            res = casted_ptr2 -> define_type(1, excalibur_builder);
             if(res.error){
                 semantic_error(res);
                 res_bool->error = true;
@@ -1923,7 +1952,7 @@ YYLABEL(yyerrhandle)
 /* END */
 
  #line 1038 "/usr/share/bison++/bison.cc"
-#line 673 "Parser.y"
+#line 702 "Parser.y"
 
 
 void semantic_error(semantic_result res)

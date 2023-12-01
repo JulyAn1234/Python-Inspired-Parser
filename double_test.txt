@@ -5,8 +5,9 @@ bool z;
 bool k;
 k=true;
 string bb;
+bb= "";
 string cc;
-cc = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+cc = bb;
 
 int a;
 a = 100;
@@ -14,11 +15,4 @@ int b;
 
 int d;
 int e;
-
-if a>2 :
-    e = (a + b * c) /( d - e +(12321.2/123*(123+12*123/12*(1+2))-(3+2*2)))/(2*121/(523+12)) ;
-end
-
-while z:
- //some code;
-end
+e = (a + b * c) /( d - e +(12321.2/123*(123+12*123/12*(1+2))-(3+2*2)))/(2*121/(523+12)) ;
