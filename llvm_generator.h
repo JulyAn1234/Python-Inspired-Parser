@@ -6,6 +6,8 @@
 #include <vector>
 #include <variant>
 #include <unordered_set>
+#include <fstream>
+#include <cstdio>
 
 using namespace std;
 
@@ -33,10 +35,10 @@ class llvm_block{
         llvm_block();
         llvm_block(int sym_link_param);
         ~llvm_block();
-        void print_block(int sym_link_offset, queue < llvm_line > static_declarations_queue);
+        void print_block(int sym_link_offset, queue < llvm_line > static_declarations_queue, ofstream& llvm_IR_file);
         void add_line_to_queue(llvm_line line);
-        void print_line(llvm_line line);
-        void print_line(llvm_line line, int sym_link_offset);
+        void print_line(llvm_line line, ofstream& llvm_IR_file);
+        void print_line(llvm_line line, int sym_link_offset, ofstream& llvm_IR_file);
         int get_block_sym_link();
         void set_following_block_sym_link(int sym_link);
         void set_block_to_jump_to_sym_link(int sym_link);
@@ -51,16 +53,25 @@ class llvm_generator
         //function constants
         const string memcpy = "declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i64, i1 immarg)";
         const string strcpy = "declare i8* @strcpy(i8* noundef, i8* noundef)";
+        const string printf = "declare i32 @printf(i8* noundef, ...)";
+
+        const string int_specifier_string = "@.str.int = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1";
+        const string double_specifier_string = "@.str.double = private unnamed_addr constant [4 x i8] c\"%lf\\00\", align 1";
+        const string string_specifier_string = "@.str.str = private unnamed_addr constant [3 x i8] c\"%s\\00\", align 1";;
+        const string new_line_specifier_string = "@.str.nl = private unnamed_addr constant [2 x i8] c\"\\0A\\00\", align 1";
 
         int sym_link_offset = 0;
         int sym_link_count;
         llvm_block* current_block;
 
         queue < llvm_block* > block_queue;
+        unordered_set < string > format_specifiers_set;
         queue < llvm_line > static_declarations_queue;
         queue < llvm_line > global_declarations_queue;
         unordered_set < string > function_declarations_set;
         stack < llvm_block* > block_stack;
+
+        ofstream llvm_IR_file;
 
     public:
         llvm_generator();
@@ -68,9 +79,13 @@ class llvm_generator
 
         void create_new_block();
 
-        void print_llvm_code();
+        void generate_llvm_IR_file(string file_name);
+
+        void initialize_file(string file_name);
 
         void print_block_queue();
+
+        void print_format_specifiers_set();
 
         void print_global_declarations_queue();
 
@@ -90,6 +105,12 @@ class llvm_generator
             //returns the symbolic link to the variable
         int add_static_declaration(string type);
 
+        //Functions for I/O
+            //Functions for output
+        void print_constant_string(string text);
+        void print_variable(int sym_link_to_variable, string variable_type);
+        void print_new_line();
+
         //Functions for storing values
         //for constant values
         void store_value_in_variable(int sym_link_to_variable, string variable_type, string variable_name,string value);
@@ -105,9 +126,6 @@ class llvm_generator
 
         //Function for adding a global declaration
         void add_global_declaration(llvm_line global_declaration);
-
-        //Function for adding a function declaration
-        void add_function_declaration(llvm_line function_declaration);
 
         //Functions for converting values
         int int_to_double(int sym_link_to_variable);

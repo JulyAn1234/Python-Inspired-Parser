@@ -310,11 +310,9 @@ semantic_result node::define_type(int temp_variable_counter, llvm_generator* exc
             }else{//do load
                 if(strcmp(type, "int")==0){
                     res.sym_link = excalibur_generator_ptr->load_value_from_variable(sym_link, type);
-                }
-                if(strcmp(type, "float")==0){
+                }else if(strcmp(type, "float")==0){
                     res.sym_link = excalibur_generator_ptr->load_value_from_variable(sym_link, type);
-                }
-                if(strcmp(type, "string")==0){
+                }else if(strcmp(type, "string")==0){
                     res.sym_link = excalibur_generator_ptr->load_value_from_variable(sym_link, type);
                 }else{
                     res.sym_link = excalibur_generator_ptr->load_value_from_variable(sym_link, type);

@@ -1,18 +1,24 @@
-float aa;
-aa = 2.0;
-int c;
-bool z;
-bool k;
-k=true;
-string bb;
-bb= "";
-string cc;
-cc = bb;
+// Sumando dos números desde mi propio lenguaje de programación
+    int numero1;
+    float numero2;
+    float suma_numero1_y_numero2;
+    int suma_truncada;
+    string nombre;
+    string nombre_cargado;
 
-int a;
-a = 100;
-int b;
+    bool b; b = false;
 
-int d;
-int e;
-e = (a + b * c) /( d - e +(12321.2/123*(123+12*123/12*(1+2))-(3+2*2)))/(2*121/(523+12)) ;
+    numero1 = 1;
+    numero2 = 2;
+    nombre = "Julian";
+    nombre_cargado = nombre;
+    suma_numero1_y_numero2 = numero1 - numero2 - numero2 /2.4 +123 *(321/numero1*123.2/3.5)/1.0;
+    suma_truncada = numero1;
+
+    write "ESTÁ VIVO" &nl;
+    write nombre_cargado;
+    write ", MIRA:" &nl;
+    write "La suma de los números es: ";
+    write suma_numero1_y_numero2 &nl;
+    write "La suma truncada de los números es: ";
+    write suma_truncada &nl;

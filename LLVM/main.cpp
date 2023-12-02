@@ -3,25 +3,28 @@
 #include <string.h>
 
 int main(){
-    bool a = false;
-    int b = 0;
-    double c = 0.0;
-    char d[100] = "Hereisastringofexactly100characterswithoutanyspacesinitH";
-    bool e = a;
-    int f = c;
-    double aa;
-    double bb;
-    int operation2 = b*b;
-    int operation3 = b/b;
-    int operation = b + f + 1 + aa + (b*b) + (3/4) + (b-b) + (aa*bb) + (aa/bb) + (aa-bb);
-    double g = c;
-    char h[100];
-    strcpy(h,d);
-    printf("%s", h);
-    if(e){
-        printf("e is true\n");
-    }
-    else{
-        printf("e is false\n");
-    }
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+
+    a = 100;
+    b = 200;
+    c = 300;
+    d = 400;
+    e = 500;
+
+    char str2 [100] = "hello world";
+    bool bool1 = true;
+    bool bool2 = bool1;
+    double doubl = 1.1;
+
+    e = (a + b * c) /( d - e +(12321.2/123*(123+12*123/12*(1+2))-(3+2*2)))/(2*121/(523+12));
+    printf("%d", e);
+    printf("%lf", doubl);
+    printf("%s", str2);
+    printf("%d", bool1);
+    printf("\n");
+
 }

@@ -1,0 +1,11 @@
+// Escribiendo strings y I/O
+    string nombre;
+    string lenguaje;
+
+    lenguaje = "Java";
+    nombre = "Leo";
+
+    write nombre;
+    write ", ";
+    write lenguaje;
+    write " vale verga" &nl;

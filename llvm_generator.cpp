@@ -1,4 +1,12 @@
 #include "llvm_generator.h"
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <variant>
+#include <unordered_set>
+#include <fstream>
+#include <cstdio>
 
 using namespace std;
 
@@ -92,6 +100,62 @@ int llvm_generator::add_static_declaration(string type){
     return sym_link_offset;
 }
 
+void llvm_generator::print_new_line(){
+    function_declarations_set.insert(printf);
+    format_specifiers_set.insert(new_line_specifier_string);
+    add_line_to_current_block({"%",sym_link_count," = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([2 x i8], [2 x i8]* @.str.nl, i64 0, i64 0))"});
+    sym_link_count++;
+}
+
+void llvm_generator::print_constant_string(string text){
+    //deleting quotes from the string
+    text = text.substr(1,text.length()-2);
+    //getting the length of the string
+    int text_length = text.length() + 1;
+    //adding null character "\00" at the end of the string
+    text += "\\00";
+    //adding the string to the global declarations queue
+    global_declarations_queue.push({"@.str."+to_string(sym_link_count)+" = private unnamed_addr constant ["+to_string(text_length)+" x i8] c\""+text+"\", align 1"});
+    //adding printf function to function declarations set
+    function_declarations_set.insert(printf);
+    //adding the call to the printf function to the current block
+    add_line_to_current_block({"%",sym_link_count," = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds (["+to_string(text_length)+" x i8], ["+to_string(text_length)+" x i8]* @.str."+to_string(sym_link_count)+", i64 0, i64 0))"});
+    sym_link_count++;
+}
+
+void llvm_generator::print_variable(int sym_link_to_variable, string variable_type){
+    if(variable_type == "int"){
+        format_specifiers_set.insert(int_specifier_string);
+        function_declarations_set.insert(printf);
+        sym_link_to_variable = load_value_from_variable(sym_link_to_variable,"int");
+        add_line_to_current_block({"%",sym_link_count," = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* @.str.int, i64 0, i64 0), i32 noundef %",sym_link_to_variable," )"});
+    }else if(variable_type == "float"){
+        format_specifiers_set.insert(double_specifier_string);
+        function_declarations_set.insert(printf);
+        sym_link_to_variable = load_value_from_variable(sym_link_to_variable,"float");
+        add_line_to_current_block({"%",sym_link_count," = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @.str.double, i64 0, i64 0), double noundef %",sym_link_to_variable," )"});
+    }else if(variable_type == "string"){
+        format_specifiers_set.insert(string_specifier_string);
+        function_declarations_set.insert(printf);
+        sym_link_to_variable = load_value_from_variable(sym_link_to_variable,"string");
+        add_line_to_current_block({"%",sym_link_count," = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* @.str.str, i64 0, i64 0), i8* noundef %",sym_link_to_variable," )"});
+    }else{
+        format_specifiers_set.insert(int_specifier_string);
+        function_declarations_set.insert(printf);
+
+        //not using load function because it would cast the result to a i8 instead of a i32
+        add_line_to_current_block({"%",sym_link_count," = load i8, i8* %"+to_string(sym_link_to_variable)+", align 1"});
+        sym_link_count++;
+        add_line_to_current_block({"%",sym_link_count," = trunc i8 %",(sym_link_count-1)," to i1"});
+        sym_link_count++;
+        add_line_to_current_block({"%",sym_link_count," = zext i1 %",(sym_link_count-1)," to i32"});
+        sym_link_count++;
+
+        add_line_to_current_block({"%",sym_link_count," = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* @.str.int, i64 0, i64 0), i32 noundef %",sym_link_count-1," )"});
+    }
+    sym_link_count++;
+}
+
 void llvm_generator::store_value_in_variable(int sym_link_to_variable, string variable_type, string variable_name, string value){
     if(variable_type=="int"){
         add_line_to_current_block({"store i32 "+value+", i32* %"+to_string(sym_link_to_variable)+", align 4"});
@@ -183,7 +247,6 @@ int llvm_generator::load_value_from_variable(int sym_link_to_variable, string va
 
 int llvm_generator::int_to_double(int sym_link_to_variable){
     int sym_link_to_result = sym_link_count;
-    //  %16 = sitofp i32 %15 to double
     add_line_to_current_block({"%",sym_link_to_result," = sitofp i32 %",sym_link_to_variable," to double"});    
     sym_link_count++;
     return sym_link_to_result;
@@ -191,7 +254,6 @@ int llvm_generator::int_to_double(int sym_link_to_variable){
 
 int llvm_generator::double_to_int(int sym_link_to_variable){
     int sym_link_to_result = sym_link_count;
-    //%15 = fptosi double %14 to i32
     add_line_to_current_block({"%",sym_link_to_result," = fptosi double %",sym_link_to_variable," to i32"});    
     sym_link_count++;
     return sym_link_to_result;
@@ -254,7 +316,7 @@ int llvm_generator::link_to_constant_operation(int sym_link,string constant, str
                 }):
             add_line_to_current_block({
                 "%", sym_link_to_result, " = ",
-                "fadd double %", sym_link, ", %", constant
+                "fadd double %", sym_link, ", ", constant
             });
     }else if(op == "-"){
         (type=="int")?
@@ -385,34 +447,49 @@ int llvm_generator::constant_to_constant_operation(string constant1, string cons
     return sym_link_to_result;
 }
 
-void llvm_generator::print_llvm_code(){
+void llvm_generator::generate_llvm_IR_file(string file_name){
+    initialize_file(file_name);
+    llvm_IR_file<<"target triple = \"x86_64-pc-linux-gnu\""<<"\n\n";
+    print_format_specifiers_set();
     print_global_declarations_queue();
-    cout<<"define dso_local noundef i32 @main() #0 {"<<"\n";
+    llvm_IR_file<<"define dso_local noundef i32 @main() #0 {"<<"\n";
     print_block_queue();
-    cout<<"}"<<"\n";
+    llvm_IR_file<<"}"<<"\n";
     print_function_declarations_set();    
+    llvm_IR_file.close();
+}
+
+void llvm_generator::initialize_file(string file_name){
+    // remove(file_name.c_str());
+    llvm_IR_file.open(file_name);
 }
 
 void llvm_generator::print_block_queue(){
     block_queue.push(current_block);
     while(!block_queue.empty()){
-        block_queue.front()->print_block(sym_link_offset, static_declarations_queue);
+        block_queue.front()->print_block(sym_link_offset, static_declarations_queue, llvm_IR_file);
         delete block_queue.front();
         block_queue.pop();
     }
 }
 
+void llvm_generator::print_format_specifiers_set(){
+    for (const auto& element : format_specifiers_set) {
+        llvm_IR_file << element << "\n";
+    }    
+}
+
 void llvm_generator::print_global_declarations_queue(){
     while(!global_declarations_queue.empty()){
         llvm_block temp_block(0);
-        temp_block.print_line(global_declarations_queue.front());
+        temp_block.print_line(global_declarations_queue.front(), llvm_IR_file);
         global_declarations_queue.pop();
     }
 }
 
 void llvm_generator::print_function_declarations_set(){
     for (const auto& element : function_declarations_set) {
-        std::cout << element << "\n";
+        llvm_IR_file << element << "\n";
     }
 }
 
@@ -471,25 +548,25 @@ void llvm_block::define_last_line(){
     add_line_to_queue(line);
 }
 
-void llvm_block::print_block(int sym_link_offset, queue < llvm_line > static_declarations_queue){
+void llvm_block::print_block(int sym_link_offset, queue < llvm_line > static_declarations_queue, ofstream& llvm_IR_file){
     define_last_line();
     if(sym_link==0){
-        cout<<sym_link<<":"<<"\n";
+        llvm_IR_file<<sym_link<<":"<<"\n";
         while(!static_declarations_queue.empty()){
-            print_line(static_declarations_queue.front());
+            print_line(static_declarations_queue.front(), llvm_IR_file);
             static_declarations_queue.pop();
         }
     }else{
-        cout<<sym_link+sym_link_offset<<":"<<"\n";
+        llvm_IR_file<<sym_link+sym_link_offset<<":"<<"\n";
     }
     
     while(!line_queue.empty()){      
-        print_line(line_queue.front(), sym_link_offset);
+        print_line(line_queue.front(), sym_link_offset, llvm_IR_file);
         line_queue.pop();
     }
 }
 
-void llvm_block::print_line(llvm_line line, int sym_link_offset){
+void llvm_block::print_line(llvm_line line, int sym_link_offset, ofstream& llvm_IR_file){
     string line_to_print = "";
     for (const auto& elem : line) {
         if (holds_alternative<int>(elem)) {
@@ -499,10 +576,10 @@ void llvm_block::print_line(llvm_line line, int sym_link_offset){
             line_to_print += get<string>(elem);
         }
     }
-    cout<<"\t"<<line_to_print<<"\n";
+    llvm_IR_file<<"\t"<<line_to_print<<"\n";
 }
 
-void llvm_block::print_line(llvm_line line){
+void llvm_block::print_line(llvm_line line, ofstream& llvm_IR_file){
     string line_to_print = "";
     for (const auto& elem : line) {
         if (holds_alternative<int>(elem)) {
@@ -512,5 +589,5 @@ void llvm_block::print_line(llvm_line line){
             line_to_print += get<string>(elem);
         }
     }
-    cout<<"\t"<<line_to_print<<"\n";
+    llvm_IR_file<<"\t"<<line_to_print<<"\n";
 }

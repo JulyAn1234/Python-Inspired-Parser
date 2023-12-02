@@ -19,6 +19,7 @@ if  {strcat(lineBuffer, yytext); return IF;}
 int|float|string|bool {strcat(lineBuffer, yytext); yylval.text = (char *) strdup(yytext);return TYPE;}
 true|false {strcat(lineBuffer, yytext); yylval.text = (char *) strdup(yytext); return BOOL;}
 end {strcat(lineBuffer, yytext); return END;}
+&nl {strcat(lineBuffer, yytext); return NEW_LINE;}
 \+ {strcat(lineBuffer, yytext); yylval.text = (char *) strdup(yytext); return SUM;}
 - {strcat(lineBuffer, yytext); yylval.text = (char *) strdup(yytext); return MINUS;}
 \/ {strcat(lineBuffer, yytext); yylval.text = (char *) strdup(yytext); return DIV;}

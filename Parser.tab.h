@@ -191,29 +191,30 @@ typedef
 
 
  #line 169 "/usr/share/bison++/bison.h"
-#define	READ	258
-#define	WRITE	259
-#define	WHILE	260
-#define	IF	261
-#define	TYPE	262
-#define	BOOL	263
-#define	END	264
-#define	SUM	265
-#define	MINUS	266
-#define	DIV	267
-#define	MULT	268
-#define	REL_OP	269
-#define	ASSIGN	270
-#define	SEMI_COLON	271
-#define	COLON	272
-#define	COMMA	273
-#define	LEFT_GROUP	274
-#define	RIGHT_GROUP	275
-#define	STRING	276
-#define	ID	277
-#define	FLOATING	278
-#define	INTEGER	279
-#define	UNDEFINED	280
+#define	NEW_LINE	258
+#define	READ	259
+#define	WRITE	260
+#define	WHILE	261
+#define	IF	262
+#define	TYPE	263
+#define	BOOL	264
+#define	END	265
+#define	SUM	266
+#define	MINUS	267
+#define	DIV	268
+#define	MULT	269
+#define	REL_OP	270
+#define	ASSIGN	271
+#define	SEMI_COLON	272
+#define	COLON	273
+#define	COMMA	274
+#define	LEFT_GROUP	275
+#define	RIGHT_GROUP	276
+#define	STRING	277
+#define	ID	278
+#define	FLOATING	279
+#define	INTEGER	280
+#define	UNDEFINED	281
 
 
 #line 169 "/usr/share/bison++/bison.h"
@@ -262,6 +263,7 @@ public:
   /* static const int token ... */
   
  #line 212 "/usr/share/bison++/bison.h"
+static const int NEW_LINE;
 static const int READ;
 static const int WRITE;
 static const int WHILE;
@@ -293,29 +295,30 @@ static const int UNDEFINED;
   enum YY_parse_ENUM_TOKEN { YY_parse_NULL_TOKEN=0
   
  #line 215 "/usr/share/bison++/bison.h"
-	,READ=258
-	,WRITE=259
-	,WHILE=260
-	,IF=261
-	,TYPE=262
-	,BOOL=263
-	,END=264
-	,SUM=265
-	,MINUS=266
-	,DIV=267
-	,MULT=268
-	,REL_OP=269
-	,ASSIGN=270
-	,SEMI_COLON=271
-	,COLON=272
-	,COMMA=273
-	,LEFT_GROUP=274
-	,RIGHT_GROUP=275
-	,STRING=276
-	,ID=277
-	,FLOATING=278
-	,INTEGER=279
-	,UNDEFINED=280
+	,NEW_LINE=258
+	,READ=259
+	,WRITE=260
+	,WHILE=261
+	,IF=262
+	,TYPE=263
+	,BOOL=264
+	,END=265
+	,SUM=266
+	,MINUS=267
+	,DIV=268
+	,MULT=269
+	,REL_OP=270
+	,ASSIGN=271
+	,SEMI_COLON=272
+	,COLON=273
+	,COMMA=274
+	,LEFT_GROUP=275
+	,RIGHT_GROUP=276
+	,STRING=277
+	,ID=278
+	,FLOATING=279
+	,INTEGER=280
+	,UNDEFINED=281
 
 
 #line 215 "/usr/share/bison++/bison.h"

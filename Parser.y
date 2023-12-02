@@ -42,6 +42,7 @@ int error_count =0;
 %type <expression_node> bool_expression
 %type <expression_node> rel_expression
 
+%token NEW_LINE
 %token READ
 %token WRITE
 %token WHILE
@@ -76,14 +77,8 @@ function_behavior:
 
 function_behavior_alpha:
     function_line
-    {
-        printf("Line: ");printf(lineBuffer); printf("\n");
-        
-    }
 |   if_statement
     {
-        printf("If: ");printf(lineBuffer); printf("\n");
-
         res = Table.delete_scope();
         if(res.error)
         {
@@ -301,15 +296,20 @@ method_call:
         }
     }
     //write prints the value of a variable
-|   WRITE LEFT_GROUP write_parameter RIGHT_GROUP 
+|   WRITE write_parameter
+
+|   WRITE write_parameter NEW_LINE
+    {
+        excalibur_builder->print_new_line();
+    }
 ;
 
 write_parameter:
     STRING
     {
-        string id($1);
-        string new_line("@t1 = "+id+"\nwrite(@t1)");
-        block_stack.add_line(new_line);
+        string text($1);
+        //Calls a excalibur_builder that calls the printf function for constant strings
+        excalibur_builder->print_constant_string(text);
     }
 |   ID
     {
@@ -317,9 +317,10 @@ write_parameter:
         if(res.error)
             semantic_error(res);
         else{
-            string id($1);
-            string new_line("@t1 = "+id+"\nwrite(@t1)");
-            block_stack.add_line(new_line);
+            int sym_link = res.sym_link;
+            string type = res.attribute;
+            //Call a excalibur_builder that calls the printf function
+            excalibur_builder->print_variable(sym_link, type);
         }
     }
 ;
@@ -783,16 +784,20 @@ int main(int argc, char** argv) {
     // Calculate the execution time in seconds
     execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
-    printf("Finalizado...\n");
     if(error_count==0){
         block_stack.write_file("IR.txt");
-        excalibur_builder->print_llvm_code();
-    }
+        string file_name(argv[1]);
+        string file_name_no_extension = file_name.substr(0, file_name.find("."));
+        string file_name_ll = file_name_no_extension + ".ll";
+        excalibur_builder->generate_llvm_IR_file(file_name_ll);
+        
+        string command = "clang -o "+file_name_no_extension+" -x ir "+file_name_ll;
 
-    // if (B == 1)
-    //     printf("\n\nParseo no finalizado debido a errores, tiempo de ejecucion: %.20f segundos\n", execution_time);
-    // else
-    //     printf("\n\nParseo completado sin errores, tiempo de ejecucion: %.20f segundos\n", execution_time);
+        system(command.c_str());        
+        
+        cout<<"Compiling time: "<<execution_time<<" seconds"<<endl;
+        cout<<"Files "<<file_name_no_extension<<" and "<<file_name_ll<<" generated successfuly."<<endl;
+    }
 
     return 0;
 }
