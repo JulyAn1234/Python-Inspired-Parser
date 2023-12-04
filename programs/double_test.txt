@@ -1,24 +1,19 @@
 // Sumando dos números desde mi propio lenguaje de programación
     int numero1;
-    int numero3; numero3 = 2;
     float numero2;
     float suma_numero1_y_numero2;
     int suma_truncada;
     string nombre;
     string nombre_cargado;
 
-    bool b; b = true;
+    bool b; b = false;
 
     numero1 = 1;
-    nombre = "Julian";
     numero2 = 2;
+    nombre = "Julian";
     nombre_cargado = nombre;
     suma_numero1_y_numero2 = numero1 - numero2 - numero2 /2.4 +123 *(321/numero1*123.2/3.5)/1.0;
     suma_truncada = numero1;
-
-    if 1>2:
-        write "Mi primer loop infinito JAJA" &nl;
-    end
 
     write "ESTÁ VIVO" &nl;
     write nombre_cargado;

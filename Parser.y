@@ -17,11 +17,13 @@ char* to_char_ptr (const string& str);
 void semantic_error(semantic_result res);
 semantic_result type_system_numeric(char* type1, char* type2, char* op);
 semantic_result get_type_relation(string type1, string type2);
+semantic_result get_type_relation_for_rel_ops(string type1, string type2);
 extern char lineBuffer[1000];
 extern int yylineno;
 
 sym_table Table;
 semantic_result res;
+semantic_result res_MYWAY;
 block_stack block_stack;
 llvm_generator* excalibur_builder = new llvm_generator();
 int error_count =0;
@@ -84,18 +86,17 @@ function_behavior_alpha:
         {
             semantic_error(res);
         }
-        block_stack.delete_if_block();
+        excalibur_builder->if_ends();
         
     }
 |   loop
     {
-        printf("loop: ");printf(lineBuffer); printf("\n");
         res = Table.delete_scope();
         if(res.error)
         {
             semantic_error(res);
         }
-        block_stack.delete_loop_block();
+        excalibur_builder->while_ends();
         
     }
 ;
@@ -105,20 +106,16 @@ function_behavior_alpha:
 loop_init:
     WHILE bool_expression COLON 
     {
-        printf("loop_init\n");
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
         else{
             semantic_result* casted_ptr = static_cast<semantic_result *> ($2);
             res = *casted_ptr;
-            if(res.error)
-                semantic_error(res);
-            else{
-                string quadruple = res.IR_node_quadruple;
-                string condition = res.IR_node_identifier;
-                block_stack.new_loop_block(quadruple, condition);
-                                
+            if(!res.error){
+                //Write IR code
+                int sym_link_to_condition = res.sym_link;
+                excalibur_builder->while_starts(sym_link_to_condition);
             }
         }
     }
@@ -133,20 +130,20 @@ loop:
 if_init:
     IF bool_expression COLON 
     {
-        printf("if_init\n");
+        cout<<"\nif init ";
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
         else{
+            cout<<"llega0...";
             semantic_result* casted_ptr = static_cast<semantic_result *> ($2);
+                                        
             res = *casted_ptr;
-            if(res.error)
-                semantic_error(res);
-            else{
-                string quadruple = res.IR_node_quadruple;
-                string condition = res.IR_node_identifier;
-                block_stack.new_if_block(quadruple, condition);
-                                
+            if(!res.error){
+                cout<<"llega...";
+                //Write IR code
+                int sym_link_to_condition = res.sym_link;
+                excalibur_builder->if_starts(sym_link_to_condition);
             }
         }            
     }
@@ -284,16 +281,24 @@ var_assign:
 
 method_call:
     //read gets input from user and assign to a variable
-    READ LEFT_GROUP ID RIGHT_GROUP
+    READ ID 
     {
-        res = Table.get_type($3);
+        res = Table.get_type($2);
         if(res.error)
             semantic_error(res);
         else{
-            string id($3);
-            string new_line("@t1 = read()\n"+id+" = @t1");
-            block_stack.add_line(new_line);
-        }
+            int sym_link = res.sym_link;
+            string type = res.attribute;
+            if(type == "bool"){
+                semantic_result res;
+                res.error = true;
+                res.message = "Cannot read a bool value";
+                semantic_error(res);
+            }else{
+                //Call a excalibur_builder that calls the scanf/fgets function
+                // excalibur_builder->read_variable(sym_link, type);
+            }
+        } 
     }
     //write prints the value of a variable
 |   WRITE write_parameter
@@ -601,116 +606,153 @@ factor:
 bool_expression:
     rel_expression
     {
-        // semantic_result* casted_ptr = static_cast<semantic_result *> ($1);
-        // res = *casted_ptr;
-        // if(res.error){
-        //     $$ = $1;
-        // }
-        // else{
-        //     $$ = $1;
-        // }
         $$ = $1;
     }
 |   BOOL
     {
-        string bool_value($1);
-        string new_line("@t1 = " +bool_value);
         semantic_result* res_bool = new semantic_result;
+        string bool_value($1);
+        int sym_link_to_result = excalibur_builder->load_constant_bool(bool_value);
         res_bool->error = false;
         res_bool->attribute = "bool";
-        res_bool->IR_node_quadruple = new_line;
-        res_bool->IR_node_identifier = "@t1";        
+        res_bool->sym_link = sym_link_to_result;
+        res_bool->is_constant = false;        
         $$ = res_bool;
     }
 |   ID
     {
-        semantic_result* res_bool = new semantic_result;
+        semantic_result res_bool_local;
         res = Table.get_type($1);
         if(res.error){
             semantic_error(res);
-            res_bool->error = true;
-            $$ = res_bool;
+            $$ = &res;
         }    
         else{
-            string id($1);
-            string new_line("@t1 = "+id);
-            res_bool->error = false;
-            res_bool->attribute = "bool";
-            res_bool->IR_node_quadruple = new_line;
-            res_bool->IR_node_identifier = "@t1";
-            $$ = res_bool;
+            int sym_link_to_result = res.sym_link;
+            string type = res.attribute;
+            if(type != "bool"){
+                res_bool_local.error = true;
+                res_bool_local.message = "Cannot use a non-bool variable as a condition";
+                semantic_error(res_bool_local);
+                $$ = &res;
+            }else{
+                sym_link_to_result = excalibur_builder->load_bool_variable_for_condition(sym_link_to_result);
+
+                res_bool_local.error = false;
+                res_bool_local.attribute = "bool";
+                res_bool_local.sym_link = sym_link_to_result;
+                res_bool_local.is_constant = false;
+
+                semantic_result* res_bool = new semantic_result(res_bool_local);
+                $$ = res_bool;
+            }
         }
     }
 ;
 rel_expression:
     numerical_expression REL_OP numerical_expression
     {
-        semantic_result* res_bool = new semantic_result;
+        string op($2);
         node* casted_ptr = static_cast<node *> ($1);
         node* casted_ptr2 = static_cast<node *> ($3);
         res = casted_ptr -> define_type(0, excalibur_builder);
         if(res.error){
             semantic_error(res);
-            res_bool->error = true;
-            $$ = res_bool;
+            $$ = &res;
         }
-        else
-        {
-            string quadruple1 = res.IR_node_quadruple;
-            string identifier1 = res.IR_node_identifier;
+        else{
+            //getting the first expression data
+            bool is_constant_1 = res.is_constant;
+            string type_1 = res.attribute;
+            string data_1;
+            int sym_link_1;
+
+            if(is_constant_1)
+                data_1 = res.data;
+            else
+                sym_link_1 = res.sym_link;
+
             res = casted_ptr2 -> define_type(1, excalibur_builder);
             if(res.error){
                 semantic_error(res);
-                res_bool->error = true;
-                $$ = res_bool;    
+                $$ = &res;    
             }else{
-                string quadruple2 = res.IR_node_quadruple;
-                string identifier2 = res.IR_node_identifier;
-                string rel_op($2);
-                string new_line("@t1 = "+identifier1+rel_op+identifier2);
-                new_line = quadruple1+"\n"+quadruple2+"\n"+new_line;
-                res_bool->error = false;
-                res_bool->attribute = "bool";
-                res_bool->IR_node_quadruple = new_line;
-                res_bool->IR_node_identifier = "@t1";
-                $$ = res_bool;
+                bool is_constant_2 = res.is_constant;
+                string type_2 = res.attribute;
+                string data_2;
+                int sym_link_2;
+                if(is_constant_2)
+                    data_2 = res.data;
+                else
+                    sym_link_2 = res.sym_link;
+
+                //Checking if the types are compatible (defining the expression's type)
+                res = get_type_relation_for_rel_ops(type_1, type_2);
+                if(res.error){
+                    semantic_error(res);
+                    $$ = &res;
+                }else{
+                    string rel_expression_type = res.attribute;
+                    //making type conversions
+                    if(rel_expression_type == "float"){
+                        if(type_1 == "int"){
+                            if(is_constant_1){
+                                data_1 = strcat(to_char_ptr(data_1), ".0");
+                            }else{
+                                sym_link_1 = excalibur_builder->int_to_double(sym_link_1);
+                            }
+                            type_1 = "float";
+                        }
+                        if(type_2 == "int"){
+                            if(is_constant_2){
+                                data_2 = strcat(to_char_ptr(data_2), ".0");
+                            }else{
+                                sym_link_2 = excalibur_builder->int_to_double(sym_link_2);
+                            }
+                            type_2 = "float";
+                        }
+                    }
+                    
+                    //writing IR according to the type of the expression and operands properties
+                    int sym_link_to_condition;
+                    if(is_constant_1){
+                        if(is_constant_2){
+                            sym_link_to_condition = excalibur_builder->constant_to_constant_operation(data_1, data_2, op, type_1);
+                        }else{
+                            sym_link_to_condition = excalibur_builder->constant_to_link_operation(data_1, sym_link_2, op, type_1);   
+                        }
+                    }else{
+                        if(is_constant_2){
+                            sym_link_to_condition = excalibur_builder->link_to_constant_operation(sym_link_1, data_2, op, type_1);
+                        }else{
+                            sym_link_to_condition = excalibur_builder->link_to_link_operation(sym_link_1, sym_link_2, op, type_1);
+                        }
+                    }
+                    semantic_result res_bool_local;
+                    res_bool_local.error = false;
+                    res_bool_local.attribute = "bool";
+                    res_bool_local.sym_link = sym_link_to_condition;
+                    res_bool_local.is_constant = false;
+
+                    semantic_result* res_bool = new semantic_result(res_bool_local);
+                    $$ = res_bool;
+                }
             } 
         }        
     }
 ;
 
-                             //BOOLEANAS
-                             
-// BOOL_EXPRESSION:
-//     BOOL_TERM BOOL_EXPRESSION_PRIME
-// ;
-
-// BOOL_EXPRESSION_PRIME:
-// //VACIO
-// |    LogOp BOOL_TERM BOOL_EXPRESSION_PRIME
-// ;
-
-// //AÑADIR FUNCIÓN
-// BOOL_TERM:
-//     ID
-// |   FUNCTION_CALL
-// |   BoolValue
-// |   REL_EXPRESSION
-// |   UNI_EXPRESSION
-// |   InBracket BOOL_EXPRESSION EndBracket
-// ;
-
 %%
 
 void semantic_error(semantic_result res)
 {
-//     if(!semantic_error_counter)
-//     {
+    try{
         error_count++;
         cout<<"\n---semantic error in line "<<yylineno<<" : << "<<lineBuffer<< " >> "<<res.message<<" ---";
-    //     semantic_error_counter = true;
-    // }
-
+        // cout<<"???"<<endl;
+    }catch (exception& e){
+        cout<<"Exception: "<<e.what()<<endl;
+    }
 }
 
 void yyerror (char* s)
@@ -758,6 +800,33 @@ semantic_result get_type_relation(string type1, string type2)
         res.error = true;
         res.message = "Incompatible types in assigning operation.";
     }
+    return res;
+}
+
+semantic_result get_type_relation_for_rel_ops(string type1, string type2){
+    semantic_result res;
+    //only ints and floats can be compared
+    if(type1 == "int" && type2 == "int"){
+        res.error = false;
+        res.attribute = "int";
+    }
+    else if(type1 == "float" && type2 == "float"){
+        res.error = false;
+        res.attribute = "float";
+    }
+    else if(type1 == "float" && type2 == "int"){
+        res.error = false;
+        res.attribute = "float";
+    }
+    else if(type1 == "int" && type2 == "float"){
+        res.error = false;
+        res.attribute = "float";
+    }
+    else{
+        res.error = true;
+        res.message = "Incompatible types in relational operation.";
+    }
+
     return res;
 }
 

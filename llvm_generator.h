@@ -92,9 +92,9 @@ class llvm_generator
         void print_function_declarations_set();
 
         //Function for handling of if/loop blocks
-        void if_starts();
+        void if_starts(int sym_link_to_condition);
         void if_ends();
-        void while_starts();
+        void while_starts(int sym_link_to_condition);
         void while_ends();
 
         //Functions for handling lines addition to the current block
@@ -123,6 +123,8 @@ class llvm_generator
         //Functions for loading values 
             //returns the symbolic link to the result 
         int load_value_from_variable(int sym_link_to_variable, string variable_type);
+        int load_constant_bool(string constant);
+        int load_bool_variable_for_condition(int sym_link_to_variable);
 
         //Function for adding a global declaration
         void add_global_declaration(llvm_line global_declaration);
@@ -136,51 +138,6 @@ class llvm_generator
         int link_to_constant_operation(int sym_link,string constant, string op, string type);
         int constant_to_link_operation(string constant, int sym_link, string op, string type);                
         int constant_to_constant_operation(string constant1, string constant2, string op, string type);
-
-        // //Functions for allocating variables, return the symbolic link to the variable
-        // int allocaInt();
-        // int allocaDouble();
-        // int allocaBool();
-        // int allocaStr();
-
-        // //Functions for storing values in variables
-        // void storeInt(string value, int sym_link);
-        // void storeDouble(string value, int sym_link);
-        // void storeBool(string value, int sym_link);
-        // void storeStr(string value, int sym_link);
-
-        // //Functions for loading values from variables
-        // //returns the symbolic link to the result
-        // int loadInt(int sym_link);
-        // int loadDouble(int sym_link);
-        // int loadBool(int sym_link);
-        // int loadStr(int sym_link);
-
-        // //Functions for transforming values from one type to another
-        // //returns the symbolic link to the result
-        // int intToDouble(int sym_link);
-        // int doubleToInt(int sym_link);
-
-        // //Functions for operations with integers
-        // //returns the symbolic link to the result
-        // int addInt(string value1,string value2);
-        // int subInt(string value1,string value2);
-        // int mulInt(string value1,string value2);
-        // int divInt(string value1,string value2);
-
-        // //Functions for operations with doubles
-        // //returns the symbolic link to the result
-        // int addDouble(string value1,string value2);
-        // int subDouble(string value1,string value2);
-        // int mulDouble(string value1,string value2);
-        // int divDouble(string value1,string value2);
-
-        // //Functions for operations between integers and doubles
-        // //returns the symbolic link to the result
-        // int addIntDouble(string value1,string value2);
-        // int subIntDouble(string value1,string value2);
-        // int mulIntDouble(string value1,string value2);
-        // int divIntDouble(string value1,string value2);
 
 };
 

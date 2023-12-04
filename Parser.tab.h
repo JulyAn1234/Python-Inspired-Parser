@@ -13,7 +13,7 @@
 
  #line 8 "/usr/share/bison++/bison.h"
 
-#line 30 "Parser.y"
+#line 32 "Parser.y"
 typedef union
 {
     char *text;

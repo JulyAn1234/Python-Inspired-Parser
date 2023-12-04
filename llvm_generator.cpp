@@ -26,10 +26,9 @@ void llvm_generator::create_new_block(){
     sym_link_count++;    
 }
 
-void llvm_generator::if_starts(){
+void llvm_generator::if_starts(int sym_link_to_condition){
     //Set condition
-    current_block->set_condition(sym_link_count);
-    sym_link_count++;
+    current_block->set_condition(sym_link_to_condition);
 
     //set block final settings
     current_block->set_block_type("ends_in_condition");
@@ -56,7 +55,7 @@ void llvm_generator::if_ends(){
 
 }
 
-void llvm_generator::while_starts(){
+void llvm_generator::while_starts(int sym_link_to_condition){
     //Setting block final settings
     current_block->set_block_type("ends_in_jump");
     current_block->set_following_block_sym_link(sym_link_count);
@@ -64,7 +63,7 @@ void llvm_generator::while_starts(){
 
     create_new_block();
 
-    if_starts();
+    if_starts(sym_link_to_condition);
 }
 
 void llvm_generator::while_ends(){
@@ -245,6 +244,25 @@ int llvm_generator::load_value_from_variable(int sym_link_to_variable, string va
     return sym_link_to_result;
 }
 
+int llvm_generator::load_constant_bool(string constant){
+    if(constant == "true"){
+        add_line_to_current_block({"%",sym_link_count," = trunc i8 1 to i1"});
+    }else{
+        add_line_to_current_block({"%",sym_link_count," = trunc i8 0 to i1"});
+    }
+    sym_link_count++;
+    return sym_link_count-1;
+}
+
+int llvm_generator::load_bool_variable_for_condition(int sym_link_to_variable){
+    add_line_to_current_block({"%",sym_link_count," = load i8, i8* %"+to_string(sym_link_to_variable)+", align 1"});
+    sym_link_count++;
+    int sym_link_to_result = sym_link_count;
+    add_line_to_current_block({"%",sym_link_to_result," = trunc i8 %",(sym_link_to_result-1)," to i1"});
+    sym_link_count++;
+    return sym_link_to_result;
+}
+
 int llvm_generator::int_to_double(int sym_link_to_variable){
     int sym_link_to_result = sym_link_count;
     add_line_to_current_block({"%",sym_link_to_result," = sitofp i32 %",sym_link_to_variable," to double"});    
@@ -301,6 +319,56 @@ int llvm_generator::link_to_link_operation(int sym_link1, int sym_link2, string 
                 "%", sym_link_to_result, " = ",
                 "fdiv double %", sym_link1, ", %", sym_link2
             });
+    }else if(op == ">"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sgt i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp ogt double %", sym_link1, ", %", sym_link2
+            });        
+    }else if(op == "<"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp slt i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp olt double %", sym_link1, ", %", sym_link2
+            });
+    }else if(op == ">="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sge i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp oge double %", sym_link1, ", %", sym_link2
+            });
+    }else if(op == "<="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sle i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp ole double %", sym_link1, ", %", sym_link2
+            });
+    }else if(op == "=="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp eq i32 %", sym_link1, ", %", sym_link2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp oeq double %", sym_link1, ", %", sym_link2
+            });
     }
     sym_link_count++;
     return sym_link_to_result;
@@ -348,7 +416,58 @@ int llvm_generator::link_to_constant_operation(int sym_link,string constant, str
                 "%", sym_link_to_result, " = ",
                 "fdiv double %", sym_link, ", ", constant
             });
+    }else if(op == ">"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sgt i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp ogt double %", sym_link, ", ", constant
+            });        
+    }else if(op == "<"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp slt i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp olt double %", sym_link, ", ", constant
+            });
+    }else if(op == ">="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sge i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp oge double %", sym_link, ", ", constant
+            });
+    }else if(op == "<="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sle i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp ole double %", sym_link, ", ", constant
+            });
+    }else if(op == "=="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp eq i32 %", sym_link, ", ", constant
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp oeq double %", sym_link, ", ", constant
+            });
     }
+
     sym_link_count++;
     return sym_link_to_result;
 }
@@ -395,7 +514,58 @@ int llvm_generator::constant_to_link_operation(string constant, int sym_link, st
                 "%", sym_link_to_result, " = ",
                 "fdiv double ", constant, ", %", sym_link
             });
+    }else if(op == ">"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sgt i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp ogt double ", constant, ", %", sym_link
+            });        
+    }else if(op == "<"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp slt i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp olt double ", constant, ", %", sym_link
+            });
+    }else if(op == ">="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sge i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp oge double ", constant, ", %", sym_link
+            });
+    }else if(op == "<="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sle i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp ole double ", constant, ", %", sym_link
+            });
+    }else if(op == "=="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp eq i32 ", constant, ", %", sym_link
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp oeq double ", constant, ", %", sym_link
+            });
     }
+    
     sym_link_count++;
     return sym_link_to_result;
 }
@@ -442,7 +612,58 @@ int llvm_generator::constant_to_constant_operation(string constant1, string cons
                 "%", sym_link_to_result, " = ",
                 "fdiv double ", constant1, ", ", constant2
             });
+    }else if(op == ">"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sgt i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp ogt double ", constant1, ", ", constant2
+            });        
+    }else if(op == "<"){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp slt i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp olt double ", constant1, ", ", constant2
+            });
+    }else if(op == ">="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sge i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp oge double ", constant1, ", ", constant2
+            });
+    }else if(op == "<="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp sle i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp ole double ", constant1, ", ", constant2
+            });
+    }else if(op == "=="){
+        (type=="int")?
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "icmp eq i32 ", constant1, ", ", constant2
+                }):
+            add_line_to_current_block({
+                "%", sym_link_to_result, " = ",
+                "fcmp oeq double ", constant1, ", ", constant2
+            });
     }
+    
     sym_link_count++;
     return sym_link_to_result;
 }
@@ -520,9 +741,7 @@ void llvm_block::add_line_to_queue(llvm_line line){
 }
 
 void llvm_block::set_condition(int condition_sym_link_param){
-    llvm_line line = {"%",condition_sym_link_param," = condition"};
     condition_sym_link = condition_sym_link_param;
-    add_line_to_queue(line);    
 }
 
 void llvm_block::define_last_line(){

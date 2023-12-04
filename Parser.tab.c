@@ -118,16 +118,18 @@ char* to_char_ptr (const string& str);
 void semantic_error(semantic_result res);
 semantic_result type_system_numeric(char* type1, char* type2, char* op);
 semantic_result get_type_relation(string type1, string type2);
+semantic_result get_type_relation_for_rel_ops(string type1, string type2);
 extern char lineBuffer[1000];
 extern int yylineno;
 
 sym_table Table;
 semantic_result res;
+semantic_result res_MYWAY;
 block_stack block_stack;
 llvm_generator* excalibur_builder = new llvm_generator();
 int error_count =0;
 
-#line 30 "Parser.y"
+#line 32 "Parser.y"
 typedef union
 {
     char *text;
@@ -539,7 +541,7 @@ YY_parse_CONSTRUCTOR_CODE;
  #line 352 "/usr/share/bison++/bison.cc"
 
 
-#define	YYFINAL		70
+#define	YYFINAL		68
 #define	YYFLAG		-32768
 #define	YYNTBASE	27
 
@@ -580,9 +582,9 @@ static const char yytranslate[] = {     0,
 #if YY_parse_DEBUG != 0
 static const short yyprhs[] = {     0,
      0,     1,     4,     6,     8,    10,    14,    18,    22,    26,
-    29,    30,    32,    34,    36,    39,    43,    48,    51,    55,
-    57,    59,    61,    63,    65,    68,    69,    73,    77,    80,
-    81,    85,    89,    91,    93,    95,    99,   101,   103,   105
+    29,    30,    32,    34,    36,    39,    43,    46,    49,    53,
+    55,    57,    59,    61,    63,    66,    67,    71,    75,    78,
+    79,    83,    87,    89,    91,    93,    97,    99,   101,   103
 };
 
 static const short yyrhs[] = {    -1,
@@ -590,23 +592,23 @@ static const short yyrhs[] = {    -1,
     45,    18,     0,    29,    27,    10,     0,     7,    45,    18,
      0,    31,    27,    10,     0,    34,    17,     0,     0,    36,
      0,    35,     0,    37,     0,     8,    23,     0,    23,    16,
-    39,     0,     4,    20,    23,    21,     0,     5,    38,     0,
-     5,    38,     3,     0,    22,     0,    23,     0,    22,     0,
-    40,     0,     9,     0,    42,    41,     0,     0,    11,    42,
-    41,     0,    12,    42,    41,     0,    44,    43,     0,     0,
-    14,    44,    43,     0,    13,    44,    43,     0,    23,     0,
-    25,     0,    24,     0,    20,    40,    21,     0,    46,     0,
-     9,     0,    23,     0,    40,    15,    40,     0
+    39,     0,     4,    23,     0,     5,    38,     0,     5,    38,
+     3,     0,    22,     0,    23,     0,    22,     0,    40,     0,
+     9,     0,    42,    41,     0,     0,    11,    42,    41,     0,
+    12,    42,    41,     0,    44,    43,     0,     0,    14,    44,
+    43,     0,    13,    44,    43,     0,    23,     0,    25,     0,
+    24,     0,    20,    40,    21,     0,    46,     0,     9,     0,
+    23,     0,    40,    15,    40,     0
 };
 
 #endif
 
 #if (YY_parse_DEBUG != 0) || defined(YY_parse_ERROR_VERBOSE) 
 static const short yyrline[] = { 0,
-    73,    75,    78,    80,    90,   105,   127,   133,   154,   161,
-   165,   167,   168,   169,   173,   197,   285,   299,   301,   307,
-   314,   331,   347,   355,   374,   396,   398,   434,   475,   496,
-   498,   535,   574,   587,   591,   595,   601,   614,   625,   645
+    75,    77,    80,    82,    92,   106,   124,   130,   151,   158,
+   162,   164,   165,   166,   170,   194,   282,   304,   306,   312,
+   319,   336,   352,   360,   379,   401,   403,   439,   480,   501,
+   503,   540,   579,   592,   596,   600,   606,   611,   622,   652
 };
 
 static const char * const yytname[] = {   "$","error","$illegal.","NEW_LINE",
@@ -629,61 +631,61 @@ static const short yyr1[] = {     0,
 
 static const short yyr2[] = {     0,
      0,     2,     1,     1,     1,     3,     3,     3,     3,     2,
-     0,     1,     1,     1,     2,     3,     4,     2,     3,     1,
+     0,     1,     1,     1,     2,     3,     2,     2,     3,     1,
      1,     1,     1,     1,     2,     0,     3,     3,     2,     0,
      3,     3,     1,     1,     1,     3,     1,     1,     1,     3
 };
 
 static const short yydefact[] = {     1,
      0,     0,     0,     0,     0,     0,     1,     1,     5,     1,
-     4,     3,     0,    13,    12,    14,     0,    20,    21,    18,
+     4,     3,     0,    13,    12,    14,    17,    20,    21,    18,
     38,     0,    33,    35,    34,     0,    26,    30,     0,    37,
-     0,    15,     0,     2,     0,     0,    10,     0,    19,    33,
-     0,     0,     0,     0,    25,     0,     0,    29,     6,     8,
-    24,    22,    16,    23,     7,     9,    17,    36,    40,    26,
-    26,    30,    30,    27,    28,    32,    31,     0,     0,     0
+     0,    15,     0,     2,     0,     0,    10,    19,    33,     0,
+     0,     0,     0,    25,     0,     0,    29,     6,     8,    24,
+    22,    16,    23,     7,     9,    36,    40,    26,    26,    30,
+    30,    27,    28,    32,    31,     0,     0,     0
 };
 
 static const short yydefgoto[] = {    34,
      7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
-    20,    53,    26,    45,    27,    48,    28,    29,    30
+    20,    52,    26,    44,    27,    47,    28,    29,    30
 };
 
-static const short yypact[] = {    -2,
-   -19,   -15,     9,     9,   -10,    29,    -2,    -2,-32768,    -2,
--32768,-32768,     2,-32768,-32768,-32768,    23,-32768,-32768,    44,
--32768,    15,    30,-32768,-32768,    34,     5,    -4,    32,-32768,
-    33,-32768,     3,-32768,    42,    43,-32768,    35,-32768,-32768,
-    36,    15,    15,    15,-32768,    15,    15,-32768,-32768,-32768,
--32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,     5,
-     5,    -4,    -4,-32768,-32768,-32768,-32768,    54,    55,-32768
+static const short yypact[] = {    -4,
+   -11,     9,     5,     5,    -8,     1,    -4,    -4,-32768,    -4,
+-32768,-32768,    -9,-32768,-32768,-32768,-32768,-32768,-32768,    24,
+-32768,   -14,    15,-32768,-32768,    20,    27,    28,    19,-32768,
+    22,-32768,    -2,-32768,    41,    42,-32768,-32768,-32768,    32,
+   -14,   -14,   -14,-32768,   -14,   -14,-32768,-32768,-32768,-32768,
+-32768,-32768,-32768,-32768,-32768,-32768,-32768,    27,    27,    28,
+    28,-32768,-32768,-32768,-32768,    54,    55,-32768
 };
 
-static const short yypgoto[] = {    14,
+static const short yypgoto[] = {    26,
 -32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
--32768,-32768,   -22,   -30,    -7,   -21,    -3,    56,-32768
+-32768,-32768,   -17,   -15,     3,   -13,     4,    52,-32768
 };
 
 
-#define	YYLAST		60
+#define	YYLAST		56
 
 
-static const short yytable[] = {    41,
-    17,     1,     2,     3,     4,     5,    18,    19,    46,    47,
-    54,    51,    32,    68,   -11,    43,    44,    21,    37,    59,
-     6,    35,    22,    36,    52,    40,    24,    25,    22,    64,
-    65,    23,    24,    25,    22,    60,    61,    40,    24,    25,
-    66,    67,    62,    63,    33,    38,    39,   -39,    42,    49,
-    50,    55,    56,    69,    70,    57,    58,     0,     0,    31
+static const short yytable[] = {     1,
+     2,     3,     4,     5,    40,    22,    50,    37,    39,    24,
+    25,    17,   -11,    21,    32,    53,    33,    22,     6,    51,
+    39,    24,    25,    57,    22,    66,    38,    23,    24,    25,
+    18,    19,   -39,    35,    41,    36,    48,    42,    43,    49,
+    45,    46,    62,    63,    58,    59,    64,    65,    60,    61,
+    54,    55,    56,    67,    68,    31
 };
 
-static const short yycheck[] = {    22,
-    20,     4,     5,     6,     7,     8,    22,    23,    13,    14,
-    33,     9,    23,     0,    17,    11,    12,     9,    17,    42,
-    23,     8,    20,    10,    22,    23,    24,    25,    20,    60,
-    61,    23,    24,    25,    20,    43,    44,    23,    24,    25,
-    62,    63,    46,    47,    16,    23,     3,    18,    15,    18,
-    18,    10,    10,     0,     0,    21,    21,    -1,    -1,     4
+static const short yycheck[] = {     4,
+     5,     6,     7,     8,    22,    20,     9,    17,    23,    24,
+    25,    23,    17,     9,    23,    33,    16,    20,    23,    22,
+    23,    24,    25,    41,    20,     0,     3,    23,    24,    25,
+    22,    23,    18,     8,    15,    10,    18,    11,    12,    18,
+    13,    14,    58,    59,    42,    43,    60,    61,    45,    46,
+    10,    10,    21,     0,     0,     4
 };
 
 #line 352 "/usr/share/bison++/bison.cc"
@@ -1180,74 +1182,69 @@ YYLABEL(yyreduce)
   switch (yyn) {
 
 case 4:
-#line 81 "Parser.y"
+#line 83 "Parser.y"
 {
         res = Table.delete_scope();
         if(res.error)
         {
             semantic_error(res);
         }
-        block_stack.delete_if_block();
+        excalibur_builder->if_ends();
         
     ;
     break;}
 case 5:
-#line 91 "Parser.y"
+#line 93 "Parser.y"
 {
-        printf("loop: ");printf(lineBuffer); printf("\n");
         res = Table.delete_scope();
         if(res.error)
         {
             semantic_error(res);
         }
-        block_stack.delete_loop_block();
+        excalibur_builder->while_ends();
         
     ;
     break;}
 case 6:
-#line 107 "Parser.y"
+#line 108 "Parser.y"
 {
-        printf("loop_init\n");
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
         else{
             semantic_result* casted_ptr = static_cast<semantic_result *> (yyvsp[-1].expression_node);
             res = *casted_ptr;
-            if(res.error)
-                semantic_error(res);
-            else{
-                string quadruple = res.IR_node_quadruple;
-                string condition = res.IR_node_identifier;
-                block_stack.new_loop_block(quadruple, condition);
-                                
+            if(!res.error){
+                //Write IR code
+                int sym_link_to_condition = res.sym_link;
+                excalibur_builder->while_starts(sym_link_to_condition);
             }
         }
     ;
     break;}
 case 8:
-#line 135 "Parser.y"
+#line 132 "Parser.y"
 {
-        printf("if_init\n");
+        cout<<"\nif init ";
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
         else{
+            cout<<"llega0...";
             semantic_result* casted_ptr = static_cast<semantic_result *> (yyvsp[-1].expression_node);
+                                        
             res = *casted_ptr;
-            if(res.error)
-                semantic_error(res);
-            else{
-                string quadruple = res.IR_node_quadruple;
-                string condition = res.IR_node_identifier;
-                block_stack.new_if_block(quadruple, condition);
-                                
+            if(!res.error){
+                cout<<"llega...";
+                //Write IR code
+                int sym_link_to_condition = res.sym_link;
+                excalibur_builder->if_starts(sym_link_to_condition);
             }
         }            
     ;
     break;}
 case 15:
-#line 175 "Parser.y"
+#line 172 "Parser.y"
 {
         int sym_link = excalibur_builder->add_static_declaration(yyvsp[-1].text);
         res = Table.insert(yyvsp[0].text, yyvsp[-1].text, sym_link);
@@ -1260,7 +1257,7 @@ case 15:
     ;
     break;}
 case 16:
-#line 199 "Parser.y"
+#line 196 "Parser.y"
 {
         string type1 = "";
         string type2 = "";
@@ -1347,26 +1344,34 @@ case 16:
     ;
     break;}
 case 17:
-#line 288 "Parser.y"
+#line 285 "Parser.y"
 {
-        res = Table.get_type(yyvsp[-1].text);
+        res = Table.get_type(yyvsp[0].text);
         if(res.error)
             semantic_error(res);
         else{
-            string id(yyvsp[-1].text);
-            string new_line("@t1 = read()\n"+id+" = @t1");
-            block_stack.add_line(new_line);
-        }
+            int sym_link = res.sym_link;
+            string type = res.attribute;
+            if(type == "bool"){
+                semantic_result res;
+                res.error = true;
+                res.message = "Cannot read a bool value";
+                semantic_error(res);
+            }else{
+                //Call a excalibur_builder that calls the scanf/fgets function
+                // excalibur_builder->read_variable(sym_link, type);
+            }
+        } 
     ;
     break;}
 case 19:
-#line 302 "Parser.y"
+#line 307 "Parser.y"
 {
         excalibur_builder->print_new_line();
     ;
     break;}
 case 20:
-#line 309 "Parser.y"
+#line 314 "Parser.y"
 {
         string text(yyvsp[0].text);
         //Calls a excalibur_builder that calls the printf function for constant strings
@@ -1374,7 +1379,7 @@ case 20:
     ;
     break;}
 case 21:
-#line 315 "Parser.y"
+#line 320 "Parser.y"
 {
         res = Table.get_type(yyvsp[0].text);
         if(res.error)
@@ -1388,7 +1393,7 @@ case 21:
     ;
     break;}
 case 22:
-#line 333 "Parser.y"
+#line 338 "Parser.y"
 {
         string text(yyvsp[0].text);
         //eliminate the quotes
@@ -1405,7 +1410,7 @@ case 22:
     ;
     break;}
 case 23:
-#line 348 "Parser.y"
+#line 353 "Parser.y"
 {
         semantic_result Node_res;        
         node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
@@ -1415,7 +1420,7 @@ case 23:
     ;
     break;}
 case 24:
-#line 356 "Parser.y"
+#line 361 "Parser.y"
 {
     string bool_value(yyvsp[0].text);
     semantic_result* res = new semantic_result;
@@ -1431,7 +1436,7 @@ case 24:
 ;
     break;}
 case 25:
-#line 376 "Parser.y"
+#line 381 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1451,11 +1456,11 @@ case 25:
     ;
     break;}
 case 26:
-#line 397 "Parser.y"
+#line 402 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
 case 27:
-#line 399 "Parser.y"
+#line 404 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1493,7 +1498,7 @@ case 27:
     ;
     break;}
 case 28:
-#line 435 "Parser.y"
+#line 440 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1532,7 +1537,7 @@ case 28:
     ;
     break;}
 case 29:
-#line 477 "Parser.y"
+#line 482 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1552,11 +1557,11 @@ case 29:
     ;
     break;}
 case 30:
-#line 497 "Parser.y"
+#line 502 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
 case 31:
-#line 499 "Parser.y"
+#line 504 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1595,7 +1600,7 @@ case 31:
     ;
     break;}
 case 32:
-#line 536 "Parser.y"
+#line 541 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1634,7 +1639,7 @@ case 32:
     ;
     break;}
 case 33:
-#line 576 "Parser.y"
+#line 581 "Parser.y"
 {            
         res = Table.get_type(yyvsp[0].text);
         if(!res.error)
@@ -1648,103 +1653,161 @@ case 33:
     ;
     break;}
 case 34:
-#line 588 "Parser.y"
+#line 593 "Parser.y"
 {
         yyval.expression_node = new node(yyvsp[0].text,"int", true);
     ;
     break;}
 case 35:
-#line 592 "Parser.y"
+#line 597 "Parser.y"
 {
         yyval.expression_node = new node(yyvsp[0].text,"float", true);
     ;
     break;}
 case 36:
-#line 596 "Parser.y"
+#line 601 "Parser.y"
 {
         yyval.expression_node = yyvsp[-1].expression_node;
     ;
     break;}
 case 37:
-#line 603 "Parser.y"
+#line 608 "Parser.y"
 {
-        // semantic_result* casted_ptr = static_cast<semantic_result *> ($1);
-        // res = *casted_ptr;
-        // if(res.error){
-        //     $$ = $1;
-        // }
-        // else{
-        //     $$ = $1;
-        // }
         yyval.expression_node = yyvsp[0].expression_node;
     ;
     break;}
 case 38:
-#line 615 "Parser.y"
+#line 612 "Parser.y"
 {
-        string bool_value(yyvsp[0].text);
-        string new_line("@t1 = " +bool_value);
         semantic_result* res_bool = new semantic_result;
+        string bool_value(yyvsp[0].text);
+        int sym_link_to_result = excalibur_builder->load_constant_bool(bool_value);
         res_bool->error = false;
         res_bool->attribute = "bool";
-        res_bool->IR_node_quadruple = new_line;
-        res_bool->IR_node_identifier = "@t1";        
+        res_bool->sym_link = sym_link_to_result;
+        res_bool->is_constant = false;        
         yyval.expression_node = res_bool;
     ;
     break;}
 case 39:
-#line 626 "Parser.y"
+#line 623 "Parser.y"
 {
-        semantic_result* res_bool = new semantic_result;
+        semantic_result res_bool_local;
         res = Table.get_type(yyvsp[0].text);
         if(res.error){
             semantic_error(res);
-            res_bool->error = true;
-            yyval.expression_node = res_bool;
+            yyval.expression_node = &res;
         }    
         else{
-            string id(yyvsp[0].text);
-            string new_line("@t1 = "+id);
-            res_bool->error = false;
-            res_bool->attribute = "bool";
-            res_bool->IR_node_quadruple = new_line;
-            res_bool->IR_node_identifier = "@t1";
-            yyval.expression_node = res_bool;
+            int sym_link_to_result = res.sym_link;
+            string type = res.attribute;
+            if(type != "bool"){
+                res_bool_local.error = true;
+                res_bool_local.message = "Cannot use a non-bool variable as a condition";
+                semantic_error(res_bool_local);
+                yyval.expression_node = &res;
+            }else{
+                sym_link_to_result = excalibur_builder->load_bool_variable_for_condition(sym_link_to_result);
+
+                res_bool_local.error = false;
+                res_bool_local.attribute = "bool";
+                res_bool_local.sym_link = sym_link_to_result;
+                res_bool_local.is_constant = false;
+
+                semantic_result* res_bool = new semantic_result(res_bool_local);
+                yyval.expression_node = res_bool;
+            }
         }
     ;
     break;}
 case 40:
-#line 647 "Parser.y"
+#line 654 "Parser.y"
 {
-        semantic_result* res_bool = new semantic_result;
+        string op(yyvsp[-1].text);
         node* casted_ptr = static_cast<node *> (yyvsp[-2].expression_node);
         node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
         res = casted_ptr -> define_type(0, excalibur_builder);
         if(res.error){
             semantic_error(res);
-            res_bool->error = true;
-            yyval.expression_node = res_bool;
+            yyval.expression_node = &res;
         }
-        else
-        {
-            string quadruple1 = res.IR_node_quadruple;
-            string identifier1 = res.IR_node_identifier;
+        else{
+            //getting the first expression data
+            bool is_constant_1 = res.is_constant;
+            string type_1 = res.attribute;
+            string data_1;
+            int sym_link_1;
+
+            if(is_constant_1)
+                data_1 = res.data;
+            else
+                sym_link_1 = res.sym_link;
+
             res = casted_ptr2 -> define_type(1, excalibur_builder);
             if(res.error){
                 semantic_error(res);
-                res_bool->error = true;
-                yyval.expression_node = res_bool;    
+                yyval.expression_node = &res;    
             }else{
-                string quadruple2 = res.IR_node_quadruple;
-                string identifier2 = res.IR_node_identifier;
-                string rel_op(yyvsp[-1].text);
-                string new_line("@t1 = "+identifier1+rel_op+identifier2);
-                new_line = quadruple1+"\n"+quadruple2+"\n"+new_line;
-                res_bool->error = false;
-                res_bool->attribute = "bool";
-                res_bool->IR_node_quadruple = new_line;
-                res_bool->IR_node_identifier = "@t1";
-                yyval.expression_node = res_bool;
+                bool is_constant_2 = res.is_constant;
+                string type_2 = res.attribute;
+                string data_2;
+                int sym_link_2;
+                if(is_constant_2)
+                    data_2 = res.data;
+                else
+                    sym_link_2 = res.sym_link;
+
+                //Checking if the types are compatible (defining the expression's type)
+                res = get_type_relation_for_rel_ops(type_1, type_2);
+                if(res.error){
+                    semantic_error(res);
+                    yyval.expression_node = &res;
+                }else{
+                    string rel_expression_type = res.attribute;
+                    //making type conversions
+                    if(rel_expression_type == "float"){
+                        if(type_1 == "int"){
+                            if(is_constant_1){
+                                data_1 = strcat(to_char_ptr(data_1), ".0");
+                            }else{
+                                sym_link_1 = excalibur_builder->int_to_double(sym_link_1);
+                            }
+                            type_1 = "float";
+                        }
+                        if(type_2 == "int"){
+                            if(is_constant_2){
+                                data_2 = strcat(to_char_ptr(data_2), ".0");
+                            }else{
+                                sym_link_2 = excalibur_builder->int_to_double(sym_link_2);
+                            }
+                            type_2 = "float";
+                        }
+                    }
+                    
+                    //writing IR according to the type of the expression and operands properties
+                    int sym_link_to_condition;
+                    if(is_constant_1){
+                        if(is_constant_2){
+                            sym_link_to_condition = excalibur_builder->constant_to_constant_operation(data_1, data_2, op, type_1);
+                        }else{
+                            sym_link_to_condition = excalibur_builder->constant_to_link_operation(data_1, sym_link_2, op, type_1);   
+                        }
+                    }else{
+                        if(is_constant_2){
+                            sym_link_to_condition = excalibur_builder->link_to_constant_operation(sym_link_1, data_2, op, type_1);
+                        }else{
+                            sym_link_to_condition = excalibur_builder->link_to_link_operation(sym_link_1, sym_link_2, op, type_1);
+                        }
+                    }
+                    semantic_result res_bool_local;
+                    res_bool_local.error = false;
+                    res_bool_local.attribute = "bool";
+                    res_bool_local.sym_link = sym_link_to_condition;
+                    res_bool_local.is_constant = false;
+
+                    semantic_result* res_bool = new semantic_result(res_bool_local);
+                    yyval.expression_node = res_bool;
+                }
             } 
         }        
     ;
@@ -1953,18 +2016,18 @@ YYLABEL(yyerrhandle)
 /* END */
 
  #line 1038 "/usr/share/bison++/bison.cc"
-#line 703 "Parser.y"
+#line 745 "Parser.y"
 
 
 void semantic_error(semantic_result res)
 {
-//     if(!semantic_error_counter)
-//     {
+    try{
         error_count++;
         cout<<"\n---semantic error in line "<<yylineno<<" : << "<<lineBuffer<< " >> "<<res.message<<" ---";
-    //     semantic_error_counter = true;
-    // }
-
+        // cout<<"???"<<endl;
+    }catch (exception& e){
+        cout<<"Exception: "<<e.what()<<endl;
+    }
 }
 
 void yyerror (char* s)
@@ -2012,6 +2075,33 @@ semantic_result get_type_relation(string type1, string type2)
         res.error = true;
         res.message = "Incompatible types in assigning operation.";
     }
+    return res;
+}
+
+semantic_result get_type_relation_for_rel_ops(string type1, string type2){
+    semantic_result res;
+    //only ints and floats can be compared
+    if(type1 == "int" && type2 == "int"){
+        res.error = false;
+        res.attribute = "int";
+    }
+    else if(type1 == "float" && type2 == "float"){
+        res.error = false;
+        res.attribute = "float";
+    }
+    else if(type1 == "float" && type2 == "int"){
+        res.error = false;
+        res.attribute = "float";
+    }
+    else if(type1 == "int" && type2 == "float"){
+        res.error = false;
+        res.attribute = "float";
+    }
+    else{
+        res.error = true;
+        res.message = "Incompatible types in relational operation.";
+    }
+
     return res;
 }
 
