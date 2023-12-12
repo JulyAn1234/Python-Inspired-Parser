@@ -541,11 +541,11 @@ YY_parse_CONSTRUCTOR_CODE;
  #line 352 "/usr/share/bison++/bison.cc"
 
 
-#define	YYFINAL		68
+#define	YYFINAL		69
 #define	YYFLAG		-32768
 #define	YYNTBASE	27
 
-#define YYTRANSLATE(x) ((unsigned)(x) <= 281 ? yytranslate[x] : 47)
+#define YYTRANSLATE(x) ((unsigned)(x) <= 281 ? yytranslate[x] : 48)
 
 static const char yytranslate[] = {     0,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -581,89 +581,93 @@ static const char yytranslate[] = {     0,
 
 #if YY_parse_DEBUG != 0
 static const short yyprhs[] = {     0,
-     0,     1,     4,     6,     8,    10,    14,    18,    22,    26,
-    29,    30,    32,    34,    36,    39,    43,    46,    49,    53,
-    55,    57,    59,    61,    63,    66,    67,    71,    75,    78,
-    79,    83,    87,    89,    91,    93,    97,    99,   101,   103
+     0,     1,     4,     6,     8,    10,    12,    16,    20,    24,
+    28,    31,    32,    34,    36,    38,    41,    45,    48,    51,
+    55,    57,    59,    61,    63,    65,    68,    69,    73,    77,
+    80,    81,    85,    89,    91,    93,    95,    99,   101,   103,
+   105
 };
 
 static const short yyrhs[] = {    -1,
-    28,    27,     0,    33,     0,    32,     0,    30,     0,     6,
-    45,    18,     0,    29,    27,    10,     0,     7,    45,    18,
-     0,    31,    27,    10,     0,    34,    17,     0,     0,    36,
-     0,    35,     0,    37,     0,     8,    23,     0,    23,    16,
-    39,     0,     4,    23,     0,     5,    38,     0,     5,    38,
-     3,     0,    22,     0,    23,     0,    22,     0,    40,     0,
-     9,     0,    42,    41,     0,     0,    11,    42,    41,     0,
-    12,    42,    41,     0,    44,    43,     0,     0,    14,    44,
-    43,     0,    13,    44,    43,     0,    23,     0,    25,     0,
-    24,     0,    20,    40,    21,     0,    46,     0,     9,     0,
-    23,     0,    40,    15,    40,     0
+    28,    27,     0,    34,     0,    33,     0,    31,     0,     6,
+     0,    29,    46,    18,     0,    30,    27,    10,     0,     7,
+    46,    18,     0,    32,    27,    10,     0,    35,    17,     0,
+     0,    37,     0,    36,     0,    38,     0,     8,    23,     0,
+    23,    16,    40,     0,     4,    23,     0,     5,    39,     0,
+     5,    39,     3,     0,    22,     0,    23,     0,    22,     0,
+    41,     0,     9,     0,    43,    42,     0,     0,    11,    43,
+    42,     0,    12,    43,    42,     0,    45,    44,     0,     0,
+    14,    45,    44,     0,    13,    45,    44,     0,    23,     0,
+    25,     0,    24,     0,    20,    41,    21,     0,    47,     0,
+     9,     0,    23,     0,    41,    15,    41,     0
 };
 
 #endif
 
 #if (YY_parse_DEBUG != 0) || defined(YY_parse_ERROR_VERBOSE) 
 static const short yyrline[] = { 0,
-    75,    77,    80,    82,    92,   106,   124,   130,   151,   158,
-   162,   164,   165,   166,   170,   194,   282,   304,   306,   312,
-   319,   336,   352,   360,   379,   401,   403,   439,   480,   501,
-   503,   540,   579,   592,   596,   600,   606,   611,   622,   652
+    75,    77,    80,    82,    92,   106,   113,   131,   137,   156,
+   163,   167,   169,   170,   171,   175,   189,   277,   299,   301,
+   307,   314,   331,   347,   355,   374,   396,   398,   434,   475,
+   496,   498,   535,   574,   587,   591,   595,   601,   606,   617,
+   647
 };
 
 static const char * const yytname[] = {   "$","error","$illegal.","NEW_LINE",
 "READ","WRITE","WHILE","IF","TYPE","BOOL","END","SUM","MINUS","DIV","MULT","REL_OP",
 "ASSIGN","SEMI_COLON","COLON","COMMA","LEFT_GROUP","RIGHT_GROUP","STRING","ID",
 "FLOATING","INTEGER","UNDEFINED","function_behavior","function_behavior_alpha",
-"loop_init","loop","if_init","if_statement","function_line","function_line_alpha",
-"var_init","var_assign","method_call","write_parameter","expression","numerical_expression",
-"numerical_expression_prime","term","term_prime","factor","bool_expression",
-"rel_expression",""
+"while_key_word","loop_init","loop","if_init","if_statement","function_line",
+"function_line_alpha","var_init","var_assign","method_call","write_parameter",
+"expression","numerical_expression","numerical_expression_prime","term","term_prime",
+"factor","bool_expression","rel_expression",""
 };
 #endif
 
 static const short yyr1[] = {     0,
     27,    27,    28,    28,    28,    29,    30,    31,    32,    33,
-    34,    34,    34,    34,    35,    36,    37,    37,    37,    38,
-    38,    39,    39,    39,    40,    41,    41,    41,    42,    43,
-    43,    43,    44,    44,    44,    44,    45,    45,    45,    46
+    34,    35,    35,    35,    35,    36,    37,    38,    38,    38,
+    39,    39,    40,    40,    40,    41,    42,    42,    42,    43,
+    44,    44,    44,    45,    45,    45,    45,    46,    46,    46,
+    47
 };
 
 static const short yyr2[] = {     0,
-     0,     2,     1,     1,     1,     3,     3,     3,     3,     2,
-     0,     1,     1,     1,     2,     3,     2,     2,     3,     1,
-     1,     1,     1,     1,     2,     0,     3,     3,     2,     0,
-     3,     3,     1,     1,     1,     3,     1,     1,     1,     3
+     0,     2,     1,     1,     1,     1,     3,     3,     3,     3,
+     2,     0,     1,     1,     1,     2,     3,     2,     2,     3,
+     1,     1,     1,     1,     1,     2,     0,     3,     3,     2,
+     0,     3,     3,     1,     1,     1,     3,     1,     1,     1,
+     3
 };
 
 static const short yydefact[] = {     1,
-     0,     0,     0,     0,     0,     0,     1,     1,     5,     1,
-     4,     3,     0,    13,    12,    14,    17,    20,    21,    18,
-    38,     0,    33,    35,    34,     0,    26,    30,     0,    37,
-     0,    15,     0,     2,     0,     0,    10,    19,    33,     0,
-     0,     0,     0,    25,     0,     0,    29,     6,     8,    24,
-    22,    16,    23,     7,     9,    36,    40,    26,    26,    30,
-    30,    27,    28,    32,    31,     0,     0,     0
+     0,     0,     6,     0,     0,     0,     1,     0,     1,     5,
+     1,     4,     3,     0,    14,    13,    15,    18,    21,    22,
+    19,    39,     0,    34,    36,    35,     0,    27,    31,     0,
+    38,    16,     0,     2,     0,     0,     0,    11,    20,    34,
+     0,     0,     0,     0,    26,     0,     0,    30,     9,    25,
+    23,    17,    24,     7,     8,    10,    37,    41,    27,    27,
+    31,    31,    28,    29,    33,    32,     0,     0,     0
 };
 
 static const short yydefgoto[] = {    34,
      7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
-    20,    52,    26,    44,    27,    47,    28,    29,    30
+    17,    21,    52,    27,    45,    28,    48,    29,    30,    31
 };
 
 static const short yypact[] = {    -4,
-   -11,     9,     5,     5,    -8,     1,    -4,    -4,-32768,    -4,
--32768,-32768,    -9,-32768,-32768,-32768,-32768,-32768,-32768,    24,
--32768,   -14,    15,-32768,-32768,    20,    27,    28,    19,-32768,
-    22,-32768,    -2,-32768,    41,    42,-32768,-32768,-32768,    32,
-   -14,   -14,   -14,-32768,   -14,   -14,-32768,-32768,-32768,-32768,
--32768,-32768,-32768,-32768,-32768,-32768,-32768,    27,    27,    28,
-    28,-32768,-32768,-32768,-32768,    54,    55,-32768
+   -15,    -6,-32768,     5,   -11,    11,    -4,     5,    -4,-32768,
+    -4,-32768,-32768,    19,-32768,-32768,-32768,-32768,-32768,-32768,
+    41,-32768,   -14,    29,-32768,-32768,    33,    20,    25,    31,
+-32768,-32768,    -2,-32768,    32,    42,    43,-32768,-32768,-32768,
+    30,   -14,   -14,   -14,-32768,   -14,   -14,-32768,-32768,-32768,
+-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,    20,    20,
+    25,    25,-32768,-32768,-32768,-32768,    54,    55,-32768
 };
 
 static const short yypgoto[] = {    26,
 -32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
--32768,-32768,   -17,   -15,     3,   -13,     4,    52,-32768
+-32768,-32768,-32768,   -18,   -26,    -3,   -19,    -1,    48,-32768
 };
 
 
@@ -671,21 +675,21 @@ static const short yypgoto[] = {    26,
 
 
 static const short yytable[] = {     1,
-     2,     3,     4,     5,    40,    22,    50,    37,    39,    24,
-    25,    17,   -11,    21,    32,    53,    33,    22,     6,    51,
-    39,    24,    25,    57,    22,    66,    38,    23,    24,    25,
-    18,    19,   -39,    35,    41,    36,    48,    42,    43,    49,
-    45,    46,    62,    63,    58,    59,    64,    65,    60,    61,
-    54,    55,    56,    67,    68,    31
+     2,     3,     4,     5,    41,    23,    50,    18,    40,    25,
+    26,    32,   -12,    22,    53,    19,    20,    23,     6,    51,
+    40,    25,    26,    58,    23,    67,    33,    24,    25,    26,
+    43,    44,    63,    64,    36,    38,    37,    46,    47,    59,
+    60,    65,    66,    39,    61,    62,   -40,    42,    49,    54,
+    57,    55,    56,    68,    69,    35
 };
 
 static const short yycheck[] = {     4,
-     5,     6,     7,     8,    22,    20,     9,    17,    23,    24,
-    25,    23,    17,     9,    23,    33,    16,    20,    23,    22,
-    23,    24,    25,    41,    20,     0,     3,    23,    24,    25,
-    22,    23,    18,     8,    15,    10,    18,    11,    12,    18,
-    13,    14,    58,    59,    42,    43,    60,    61,    45,    46,
-    10,    10,    21,     0,     0,     4
+     5,     6,     7,     8,    23,    20,     9,    23,    23,    24,
+    25,    23,    17,     9,    33,    22,    23,    20,    23,    22,
+    23,    24,    25,    42,    20,     0,    16,    23,    24,    25,
+    11,    12,    59,    60,     9,    17,    11,    13,    14,    43,
+    44,    61,    62,     3,    46,    47,    18,    15,    18,    18,
+    21,    10,    10,     0,     0,     8
 };
 
 #line 352 "/usr/share/bison++/bison.cc"
@@ -1208,6 +1212,12 @@ case 5:
 case 6:
 #line 108 "Parser.y"
 {
+        excalibur_builder->while_starts();
+    ;
+    break;}
+case 7:
+#line 115 "Parser.y"
+{
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
@@ -1217,20 +1227,18 @@ case 6:
             if(!res.error){
                 //Write IR code
                 int sym_link_to_condition = res.sym_link;
-                excalibur_builder->while_starts(sym_link_to_condition);
+                excalibur_builder->if_starts(sym_link_to_condition);
             }
         }
     ;
     break;}
-case 8:
-#line 132 "Parser.y"
+case 9:
+#line 139 "Parser.y"
 {
-        cout<<"\nif init ";
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
         else{
-            cout<<"llega0...";
             semantic_result* casted_ptr = static_cast<semantic_result *> (yyvsp[-1].expression_node);
                                         
             res = *casted_ptr;
@@ -1243,8 +1251,8 @@ case 8:
         }            
     ;
     break;}
-case 15:
-#line 172 "Parser.y"
+case 16:
+#line 177 "Parser.y"
 {
         int sym_link = excalibur_builder->add_static_declaration(yyvsp[-1].text);
         res = Table.insert(yyvsp[0].text, yyvsp[-1].text, sym_link);
@@ -1256,8 +1264,8 @@ case 15:
         block_stack.add_line(new_line);
     ;
     break;}
-case 16:
-#line 196 "Parser.y"
+case 17:
+#line 191 "Parser.y"
 {
         string type1 = "";
         string type2 = "";
@@ -1343,8 +1351,8 @@ case 16:
         }
     ;
     break;}
-case 17:
-#line 285 "Parser.y"
+case 18:
+#line 280 "Parser.y"
 {
         res = Table.get_type(yyvsp[0].text);
         if(res.error)
@@ -1359,27 +1367,27 @@ case 17:
                 semantic_error(res);
             }else{
                 //Call a excalibur_builder that calls the scanf/fgets function
-                // excalibur_builder->read_variable(sym_link, type);
+                excalibur_builder->read_variable(sym_link, type);
             }
         } 
     ;
     break;}
-case 19:
-#line 307 "Parser.y"
+case 20:
+#line 302 "Parser.y"
 {
         excalibur_builder->print_new_line();
     ;
     break;}
-case 20:
-#line 314 "Parser.y"
+case 21:
+#line 309 "Parser.y"
 {
         string text(yyvsp[0].text);
         //Calls a excalibur_builder that calls the printf function for constant strings
         excalibur_builder->print_constant_string(text);
     ;
     break;}
-case 21:
-#line 320 "Parser.y"
+case 22:
+#line 315 "Parser.y"
 {
         res = Table.get_type(yyvsp[0].text);
         if(res.error)
@@ -1392,8 +1400,8 @@ case 21:
         }
     ;
     break;}
-case 22:
-#line 338 "Parser.y"
+case 23:
+#line 333 "Parser.y"
 {
         string text(yyvsp[0].text);
         //eliminate the quotes
@@ -1409,8 +1417,8 @@ case 22:
         yyval.expression_node = res; 
     ;
     break;}
-case 23:
-#line 353 "Parser.y"
+case 24:
+#line 348 "Parser.y"
 {
         semantic_result Node_res;        
         node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
@@ -1419,8 +1427,8 @@ case 23:
         yyval.expression_node = res;
     ;
     break;}
-case 24:
-#line 361 "Parser.y"
+case 25:
+#line 356 "Parser.y"
 {
     string bool_value(yyvsp[0].text);
     semantic_result* res = new semantic_result;
@@ -1435,8 +1443,8 @@ case 24:
     yyval.expression_node = res;
 ;
     break;}
-case 25:
-#line 381 "Parser.y"
+case 26:
+#line 376 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1455,56 +1463,17 @@ case 25:
         }
     ;
     break;}
-case 26:
-#line 402 "Parser.y"
+case 27:
+#line 397 "Parser.y"
 {yyval.expression_node = nullptr;
     break;}
-case 27:
-#line 404 "Parser.y"
-{
-        if(yyvsp[0].expression_node == nullptr)
-        {
-            // The operator becomes the root node of a new three
-            node* ptr = new node(yyvsp[-2].text);
-            //$2 is currently a void pointer, here it's beeing casted as a node pointer
-            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
-
-            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
-            ptr -> assign_right_node(casted_ptr);
-            yyval.expression_node = ptr;
-        }
-        else
-        {
-            //Realizar una operacion entre $3 y $2 --> Comprobacion de tipos
-            // res = type_system_numeric($3,$2,operator_aux);
-            
-            // The operator becomes the root node of a new tree
-            node* ptr = new node(yyvsp[-2].text);
-
-            //$2 is currently a void pointer, here it's beeing casted as a node pointer
-            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
-
-            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
-            ptr -> assign_right_node(casted_ptr);
-
-            //assigning the new tree as the leftmost leave of the $3 tree
-            //first, an auxiliar pointer casted as node*
-            node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
-
-            //Then,from casted_ptr2 we call insert_left_most
-            casted_ptr2 -> insert_left_most(ptr);
-            yyval.expression_node = casted_ptr2;
-        }
-    ;
-    break;}
 case 28:
-#line 440 "Parser.y"
+#line 399 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
             // The operator becomes the root node of a new three
             node* ptr = new node(yyvsp[-2].text);
-
             //$2 is currently a void pointer, here it's beeing casted as a node pointer
             node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
 
@@ -1537,31 +1506,7 @@ case 28:
     ;
     break;}
 case 29:
-#line 482 "Parser.y"
-{
-        if(yyvsp[0].expression_node == nullptr)
-        {
-            yyval.expression_node = yyvsp[-1].expression_node;
-        }
-        else
-        {
-            //assigning $1 (factor) as the leftmost leave of the $2 (term_prime) tree
-            //first, two auxiliar pointer casted as node*
-            node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
-            node* casted_ptr2 = static_cast<node *> (yyvsp[-1].expression_node);
-
-            //Then,from casted_ptr we call insert_left_most
-            casted_ptr -> insert_left_most(casted_ptr2);
-            yyval.expression_node = casted_ptr;            
-        }
-    ;
-    break;}
-case 30:
-#line 502 "Parser.y"
-{yyval.expression_node = nullptr;
-    break;}
-case 31:
-#line 504 "Parser.y"
+#line 435 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1599,8 +1544,71 @@ case 31:
         }
     ;
     break;}
+case 30:
+#line 477 "Parser.y"
+{
+        if(yyvsp[0].expression_node == nullptr)
+        {
+            yyval.expression_node = yyvsp[-1].expression_node;
+        }
+        else
+        {
+            //assigning $1 (factor) as the leftmost leave of the $2 (term_prime) tree
+            //first, two auxiliar pointer casted as node*
+            node* casted_ptr = static_cast<node *> (yyvsp[0].expression_node);
+            node* casted_ptr2 = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //Then,from casted_ptr we call insert_left_most
+            casted_ptr -> insert_left_most(casted_ptr2);
+            yyval.expression_node = casted_ptr;            
+        }
+    ;
+    break;}
+case 31:
+#line 497 "Parser.y"
+{yyval.expression_node = nullptr;
+    break;}
 case 32:
-#line 541 "Parser.y"
+#line 499 "Parser.y"
+{
+        if(yyvsp[0].expression_node == nullptr)
+        {
+            // The operator becomes the root node of a new three
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+            yyval.expression_node = ptr;
+        }
+        else
+        {
+            //Realizar una operacion entre $3 y $2 --> Comprobacion de tipos
+            // res = type_system_numeric($3,$2,operator_aux);
+            
+            // The operator becomes the root node of a new tree
+            node* ptr = new node(yyvsp[-2].text);
+
+            //$2 is currently a void pointer, here it's beeing casted as a node pointer
+            node* casted_ptr = static_cast<node *> (yyvsp[-1].expression_node);
+
+            //casted_ptr points to $2 node, here it's being assign as the right son of the new tree
+            ptr -> assign_right_node(casted_ptr);
+
+            //assigning the new tree as the leftmost leave of the $3 tree
+            //first, an auxiliar pointer casted as node*
+            node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
+
+            //Then,from casted_ptr2 we call insert_left_most
+            casted_ptr2 -> insert_left_most(ptr);
+            yyval.expression_node = casted_ptr2;
+        }
+    ;
+    break;}
+case 33:
+#line 536 "Parser.y"
 {
         if(yyvsp[0].expression_node == nullptr)
         {
@@ -1638,8 +1646,8 @@ case 32:
         }
     ;
     break;}
-case 33:
-#line 581 "Parser.y"
+case 34:
+#line 576 "Parser.y"
 {            
         res = Table.get_type(yyvsp[0].text);
         if(!res.error)
@@ -1652,32 +1660,32 @@ case 33:
         }
     ;
     break;}
-case 34:
-#line 593 "Parser.y"
+case 35:
+#line 588 "Parser.y"
 {
         yyval.expression_node = new node(yyvsp[0].text,"int", true);
     ;
     break;}
-case 35:
-#line 597 "Parser.y"
+case 36:
+#line 592 "Parser.y"
 {
         yyval.expression_node = new node(yyvsp[0].text,"float", true);
     ;
     break;}
-case 36:
-#line 601 "Parser.y"
+case 37:
+#line 596 "Parser.y"
 {
         yyval.expression_node = yyvsp[-1].expression_node;
     ;
     break;}
-case 37:
-#line 608 "Parser.y"
+case 38:
+#line 603 "Parser.y"
 {
         yyval.expression_node = yyvsp[0].expression_node;
     ;
     break;}
-case 38:
-#line 612 "Parser.y"
+case 39:
+#line 607 "Parser.y"
 {
         semantic_result* res_bool = new semantic_result;
         string bool_value(yyvsp[0].text);
@@ -1689,8 +1697,8 @@ case 38:
         yyval.expression_node = res_bool;
     ;
     break;}
-case 39:
-#line 623 "Parser.y"
+case 40:
+#line 618 "Parser.y"
 {
         semantic_result res_bool_local;
         res = Table.get_type(yyvsp[0].text);
@@ -1720,12 +1728,13 @@ case 39:
         }
     ;
     break;}
-case 40:
-#line 654 "Parser.y"
+case 41:
+#line 649 "Parser.y"
 {
         string op(yyvsp[-1].text);
         node* casted_ptr = static_cast<node *> (yyvsp[-2].expression_node);
         node* casted_ptr2 = static_cast<node *> (yyvsp[0].expression_node);
+        int sym_link_to_condition_corrected = excalibur_builder->get_sym_link_count();
         res = casted_ptr -> define_type(0, excalibur_builder);
         if(res.error){
             semantic_error(res);
@@ -2016,7 +2025,7 @@ YYLABEL(yyerrhandle)
 /* END */
 
  #line 1038 "/usr/share/bison++/bison.cc"
-#line 745 "Parser.y"
+#line 741 "Parser.y"
 
 
 void semantic_error(semantic_result res)

@@ -54,6 +54,9 @@ class llvm_generator
         const string memcpy = "declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i64, i1 immarg)";
         const string strcpy = "declare i8* @strcpy(i8* noundef, i8* noundef)";
         const string printf = "declare i32 @printf(i8* noundef, ...)";
+        const string fgets = "declare i8* @fgets(i8* noundef, i32 noundef, %struct._IO_FILE* noundef)";
+        const string getchar = "declare i32 @getchar()";
+        const string scanf = "declare i32 @__isoc99_scanf(i8* noundef, ...)";        
 
         const string int_specifier_string = "@.str.int = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1";
         const string double_specifier_string = "@.str.double = private unnamed_addr constant [4 x i8] c\"%lf\\00\", align 1";
@@ -77,6 +80,8 @@ class llvm_generator
         llvm_generator();
         ~llvm_generator();
 
+        int get_sym_link_count();
+
         void create_new_block();
 
         void generate_llvm_IR_file(string file_name);
@@ -95,6 +100,7 @@ class llvm_generator
         void if_starts(int sym_link_to_condition);
         void if_ends();
         void while_starts(int sym_link_to_condition);
+        void while_starts();
         void while_ends();
 
         //Functions for handling lines addition to the current block
@@ -110,6 +116,9 @@ class llvm_generator
         void print_constant_string(string text);
         void print_variable(int sym_link_to_variable, string variable_type);
         void print_new_line();
+
+            //Functions for input
+        void read_variable(int sym_link, string type);
 
         //Functions for storing values
         //for constant values

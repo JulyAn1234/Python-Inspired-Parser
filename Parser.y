@@ -103,8 +103,15 @@ function_behavior_alpha:
 
 ///////////////////// BUCLES //////////////////
 
+while_key_word:
+    WHILE
+    {
+        excalibur_builder->while_starts();
+    }
+;
+
 loop_init:
-    WHILE bool_expression COLON 
+    while_key_word bool_expression COLON 
     {
         res = Table.new_scope();
         if(res.error)
@@ -115,7 +122,7 @@ loop_init:
             if(!res.error){
                 //Write IR code
                 int sym_link_to_condition = res.sym_link;
-                excalibur_builder->while_starts(sym_link_to_condition);
+                excalibur_builder->if_starts(sym_link_to_condition);
             }
         }
     }
@@ -130,12 +137,10 @@ loop:
 if_init:
     IF bool_expression COLON 
     {
-        cout<<"\nif init ";
         res = Table.new_scope();
         if(res.error)
             semantic_error(res);
         else{
-            cout<<"llega0...";
             semantic_result* casted_ptr = static_cast<semantic_result *> ($2);
                                         
             res = *casted_ptr;
@@ -180,16 +185,6 @@ var_init:
         block_stack.add_line(new_line);
     }
 ;
-
-//UNCOMMENT IF: you want to handle multiple declarations at a time: int id, id2, id3, id4;
-    // multi_id: 
-    //     ID comma_id
-    // ;   
-    //     //Estructura zero o más
-    //     comma_id:
-    //     //Vacio
-    //     |   COMMA ID comma_id
-    //     ;
 
 var_assign: 
     ID ASSIGN expression
@@ -296,7 +291,7 @@ method_call:
                 semantic_error(res);
             }else{
                 //Call a excalibur_builder that calls the scanf/fgets function
-                // excalibur_builder->read_variable(sym_link, type);
+                excalibur_builder->read_variable(sym_link, type);
             }
         } 
     }
@@ -655,6 +650,7 @@ rel_expression:
         string op($2);
         node* casted_ptr = static_cast<node *> ($1);
         node* casted_ptr2 = static_cast<node *> ($3);
+        int sym_link_to_condition_corrected = excalibur_builder->get_sym_link_count();
         res = casted_ptr -> define_type(0, excalibur_builder);
         if(res.error){
             semantic_error(res);

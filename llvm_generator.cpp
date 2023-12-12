@@ -17,6 +17,10 @@ llvm_generator::llvm_generator(){
 
 llvm_generator::~llvm_generator(){}
 
+int llvm_generator::get_sym_link_count(){
+    return sym_link_count;
+}
+
 void llvm_generator::add_line_to_current_block(llvm_line line){
     current_block->add_line_to_queue(line);
 }
@@ -63,7 +67,18 @@ void llvm_generator::while_starts(int sym_link_to_condition){
 
     create_new_block();
 
-    if_starts(sym_link_to_condition);
+//    if_starts(sym_link_to_condition);
+}
+
+void llvm_generator::while_starts(){
+    //Setting block final settings
+    current_block->set_block_type("ends_in_jump");
+    current_block->set_following_block_sym_link(sym_link_count);
+    block_queue.push(current_block);
+
+    create_new_block();
+
+//    if_starts(sym_link_to_condition);
 }
 
 void llvm_generator::while_ends(){
@@ -104,6 +119,43 @@ void llvm_generator::print_new_line(){
     format_specifiers_set.insert(new_line_specifier_string);
     add_line_to_current_block({"%",sym_link_count," = call i32 (i8*, ...) @printf(i8* noundef getelementptr inbounds ([2 x i8], [2 x i8]* @.str.nl, i64 0, i64 0))"});
     sym_link_count++;
+}
+
+void llvm_generator::read_variable(int sym_link, string type){
+    string message_input, message_error; 
+    if(type == "int"){
+        function_declarations_set.insert(scanf); function_declarations_set.insert(printf);function_declarations_set.insert(getchar);
+        format_specifiers_set.insert(int_specifier_string);
+        print_constant_string(message_input);
+        while_starts();
+        add_line_to_current_block({"%",sym_link_count," = call i32 (i8*, ...) @__isoc99_scanf(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* @.str.int, i64 0, i64 0), i32* noundef %",sym_link,")"});
+        sym_link_count++;
+        int sym_link_to_first_while_condition = link_to_constant_operation(sym_link_count-1,"0","==","int");
+        sym_link_count++;
+        if_starts(sym_link_to_first_while_condition);
+        print_constant_string(message_error);
+        add_line_to_current_block({"%", sym_link_count, " = call i32 @getchar()"});        
+        int sym_link_to_second_while_condition = sym_link_count;
+        sym_link_count++;
+        //  %30 = icmp ne i32 %29, 10
+        add_line_to_current_block({"%", sym_link_count, " = icmp ne i32 %", sym_link_to_second_while_condition, ", 10"});
+        sym_link_count++;
+        while_starts(sym_link_to_second_while_condition);
+        while_ends();
+        while_ends();
+        add_line_to_current_block({"%", sym_link_count, " = call i32 @getchar()"});        
+        sym_link_to_second_while_condition = sym_link_count;
+        sym_link_count++;
+        //  %30 = icmp ne i32 %29, 10
+        add_line_to_current_block({"%", sym_link_count, " = icmp ne i32 %", sym_link_to_second_while_condition, ", 10"});
+        sym_link_count++;
+        while_starts(sym_link_to_second_while_condition);
+        while_ends();
+    }else if(type == "float"){
+        
+    }else{
+        
+    }
 }
 
 void llvm_generator::print_constant_string(string text){

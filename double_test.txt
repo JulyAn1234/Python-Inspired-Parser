@@ -1,4 +1,4 @@
-// Sumando dos números desde mi propio lenguaje de programación
+// Sumandode los números es: ";
     int numero1;
     int numero3; numero3 = 2;
     float numero2;
@@ -16,8 +16,11 @@
     suma_numero1_y_numero2 = numero1 - numero2 - numero2 /2.4 +123 *(321/numero1*123.2/3.5)/1.0;
     suma_truncada = numero1;
 
-    if 1>2:
+    int contador; contador = 0;
+
+    if contador<5:
         write "Mi primer loop infinito JAJA" &nl;
+        contador = contador+1;
     end
 
     write "ESTÁ VIVO" &nl;
@@ -25,5 +28,3 @@
     write ", MIRA:" &nl;
     write "La suma de los números es: ";
     write suma_numero1_y_numero2 &nl;
-    write "La suma truncada de los números es: ";
-    write suma_truncada &nl;
